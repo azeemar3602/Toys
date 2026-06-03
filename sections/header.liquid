@@ -190,6 +190,8 @@
   background: #fff;
   border-bottom: 2px solid #ECECF3;
   box-shadow: 0 2px 8px rgba(17,25,54,0.04);
+  position: relative;
+  z-index: 100;
 }
 .toy-hdr-nav__inner {
   display: flex;
@@ -199,11 +201,16 @@
   margin: 0 auto;
   padding: 0 24px;
 }
+
+/* Nav item wrapper */
+.toy-nav-item {
+  position: relative;
+}
 .toy-nav-lnk {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 11px 13px;
+  gap: 4px;
+  padding: 11px 12px;
   font-size: 13px;
   font-weight: 600;
   color: #111936;
@@ -213,12 +220,58 @@
   white-space: nowrap;
   transition: color 0.18s, border-color 0.18s;
 }
-.toy-nav-lnk:hover { color: #F72568; border-bottom-color: #F72568; }
-.toy-nav-lnk svg { width: 13px; height: 13px; flex-shrink: 0; opacity: 0.75; }
-.toy-nav-lnk--deals { color: #F72568; }
-.toy-nav-lnk--deals:hover { color: #d91e59; }
-.toy-nav-lnk--sale { color: #7B4DE8; }
-.toy-nav-lnk--sale:hover { color: #6a3dd4; }
+.toy-nav-lnk:hover,
+.toy-nav-item:hover > .toy-nav-lnk { color: #F72568; border-bottom-color: #F72568; }
+.toy-nav-lnk svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.6; }
+.toy-nav-lnk--deals { color: #F72568 !important; }
+.toy-nav-lnk--sale  { color: #7B4DE8 !important; }
+
+/* Chevron icon for items with dropdown */
+.toy-nav-chevron {
+  width: 11px;
+  height: 11px;
+  opacity: 0.5;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.toy-nav-item:hover .toy-nav-chevron { transform: rotate(180deg); opacity: 0.8; }
+
+/* Dropdown panel */
+.toy-nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid rgba(17,25,54,0.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(17,25,54,0.14);
+  padding: 8px 0;
+  z-index: 200;
+  animation: toyDropIn 0.15s ease;
+}
+@keyframes toyDropIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.toy-nav-item:hover .toy-nav-dropdown { display: block; }
+.toy-nav-dropdown__link {
+  display: block;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.toy-nav-dropdown__link:hover {
+  background: #fff0f6;
+  color: #F72568;
+  padding-left: 22px;
+}
+
 @media (max-width: 768px) { .toy-hdr-main, .toy-hdr-nav { display: none; } }
 
 /* ── Sticky ────────────────────────────────────────────────── */
@@ -373,39 +426,44 @@
     </div>
   </div>
 
-  <!-- ── NAV BAR (DESKTOP) ──────────────────────────────────── -->
+  <!-- ── NAV BAR (DESKTOP) — Dynamic from Shopify menu ────── -->
   <nav class="toy-hdr-nav" aria-label="Main navigation">
     <div class="toy-hdr-nav__inner">
-      <a href="/collections/all" class="toy-nav-lnk">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
-        All Toys
-      </a>
-      <a href="/collections/boys" class="toy-nav-lnk">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        By Age
-      </a>
-      <a href="/collections/learning-toys" class="toy-nav-lnk">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path stroke-linecap="round" d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        Learning Toys
-      </a>
-      <a href="/collections/gifts" class="toy-nav-lnk">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7m0 0H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-        Gifts
-      </a>
-      <a href="/collections/new-arrivals" class="toy-nav-lnk">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        New Arrivals
-      </a>
-      <a href="/collections/deals" class="toy-nav-lnk toy-nav-lnk--deals">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        🔥 Deals
-      </a>
-      <a href="/collections/clearance-sale" class="toy-nav-lnk toy-nav-lnk--sale">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        Clearance Sale
-      </a>
-      <a href="/pages/order-tracking" class="toy-nav-lnk">Order Tracking</a>
-      <a href="/pages/faqs" class="toy-nav-lnk">FAQs</a>
+      {%- for link in main_menu.links -%}
+        {%- liquid
+          assign link_handle = link.title | handle
+          assign is_deals     = false
+          assign is_sale      = false
+          if link_handle contains 'deal' or link_handle contains 'top-toys' or link_handle contains 'top toys'
+            assign is_deals = true
+          endif
+          if link_handle contains 'clearance' or link_handle contains 'sale'
+            assign is_sale = true
+          endif
+        -%}
+        {%- if link.links.size > 0 -%}
+          <div class="toy-nav-item">
+            <a href="{{ link.url }}"
+               class="toy-nav-lnk{% if is_deals %} toy-nav-lnk--deals{% elsif is_sale %} toy-nav-lnk--sale{% endif %}"
+               aria-haspopup="true">
+              {{- link.title -}}
+              <svg class="toy-nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+            </a>
+            <div class="toy-nav-dropdown" role="menu">
+              {%- for child_link in link.links -%}
+                <a href="{{ child_link.url }}" class="toy-nav-dropdown__link" role="menuitem">{{ child_link.title }}</a>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- else -%}
+          <div class="toy-nav-item">
+            <a href="{{ link.url }}"
+               class="toy-nav-lnk{% if is_deals %} toy-nav-lnk--deals{% elsif is_sale %} toy-nav-lnk--sale{% endif %}">
+              {{- link.title -}}
+            </a>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
   </nav>
 
