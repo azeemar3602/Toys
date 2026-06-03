@@ -1,0 +1,3 @@
+[environments.production]
+store = "u7a47a-0i.myshopify.com"
+theme = "148828881122"
