@@ -1,0 +1,98 @@
+{%- liquid
+  assign desktop_src = 'https://cdn.shopify.com/s/files/1/0739/3080/1378/files/toylicious-pakistan-kids-toys-online-hero-desktop_1.webp?v=1780527596'
+  assign mobile_src  = 'https://cdn.shopify.com/s/files/1/0739/3080/1378/files/toylicious-pakistan-kids-toys-online-hero-desktop.webp?v=1780527597'
+  assign hero_link   = section.settings.link | default: '/collections/all'
+  assign hero_alt    = section.settings.alt | default: 'Shop Kids Toys Online in Pakistan - Toylicious.pk'
+
+  if section.settings.desktop_image != blank
+    assign desktop_src = section.settings.desktop_image | img_url: '2048x'
+  endif
+  if section.settings.mobile_image != blank
+    assign mobile_src = section.settings.mobile_image | img_url: '800x'
+  endif
+-%}
+
+<style>
+.toy-hero-wrap {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+  text-decoration: none;
+}
+.toy-hero-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.toy-hero-desktop { display: block; }
+.toy-hero-mobile  { display: none;  }
+
+@media (max-width: 767px) {
+  .toy-hero-desktop { display: none;  }
+  .toy-hero-mobile  { display: block; }
+}
+</style>
+
+<a href="{{ hero_link }}" class="toy-hero-wrap" aria-label="{{ hero_alt }}">
+
+  {{- '<!-- Desktop Hero -->' }}
+  <img
+    class="toy-hero-desktop"
+    src="{{ desktop_src }}"
+    alt="{{ hero_alt }}"
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+    width="2048">
+
+  {{- '<!-- Mobile Hero -->' }}
+  <img
+    class="toy-hero-mobile"
+    src="{{ mobile_src }}"
+    alt="{{ hero_alt }}"
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+    width="800">
+
+</a>
+
+{% schema %}
+{
+  "name": "🎯 Hero Banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "Desktop image (overrides default)",
+      "info": "Recommended: 2048 × 720px"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image (overrides default)",
+      "info": "Recommended: 800 × 1000px"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Click destination",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "alt",
+      "label": "Alt text",
+      "default": "Shop Kids Toys Online in Pakistan - Toylicious.pk"
+    }
+  ],
+  "presets": [
+    {
+      "name": "🎯 Hero Banner",
+      "category": "Image"
+    }
+  ]
+}
+{% endschema %}
