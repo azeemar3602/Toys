@@ -874,6 +874,22 @@
     ]
   },
   {
+    "name": "WhatsApp",
+    "settings": [
+      {
+        "type": "header",
+        "content": "WhatsApp Contact"
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "WhatsApp number (digits only)",
+        "info": "Country code + number, no + or spaces. Example: 923376246084",
+        "default": "923376246084"
+      }
+    ]
+  },
+  {
     "name": "Social media",
     "settings": [
       {

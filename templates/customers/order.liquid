@@ -1,222 +1,148 @@
 <div class="page-width page-content">
 
   {% if settings.show_breadcrumbs %}
-    <nav class="breadcrumb{% if settings.type_headers_align_text %} text-center{% endif %}" role="navigation" aria-label="breadcrumbs">
-      <a href="{{ routes.account_url }}">{{ 'customer.account.title' | t }}</a>
-      <span class="divider" aria-hidden="true">/</span>
-      {{ 'customer.orders.title' | t }}
+    <nav class="breadcrumb" role="navigation" aria-label="breadcrumbs" style="margin-bottom:16px; font-size:13px; color:#6b7280;">
+      <a href="{{ routes.account_url }}" style="color:#111936; font-weight:600;">My Account</a>
+      <span style="margin:0 8px; color:#d1d5db;">›</span>
+      <span>Order {{ order.name }}</span>
     </nav>
   {% endif %}
 
-  <header class="section-header">
-    <h1 class="section-header__title">{{ 'customer.order.title' | t: name: order.name }}</h1>
-  </header>
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px;">
+    <div>
+      <h1 style="color:#111936; font-weight:800; margin:0 0 4px; font-size:26px;">Order {{ order.name }}</h1>
+      {%- assign order_date = order.created_at | time_tag: format: "date_at_time" -%}
+      <p style="color:#6b7280; font-size:14px; margin:0;">Placed {{ order_date }}</p>
+    </div>
+    {%- assign wa_number = settings.whatsapp_number | default: '923376246084' | remove: '+' | remove: ' ' | remove: '-' -%}
+    {%- capture wa_track_msg -%}Assalam o Alaikum Toylicious, I want to track my order. My order number is {{ order.name }}.{%- endcapture -%}
+    <a href="https://wa.me/{{ wa_number }}?text={{ wa_track_msg | url_encode }}" target="_blank" rel="noopener" class="toy-wa-track-btn" style="display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff; border-radius:12px; padding:11px 20px; font-weight:700; font-size:14px; text-decoration:none;">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+      Track Order on WhatsApp
+    </a>
+  </div>
+
+  {% if order.cancelled %}
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:16px; margin-bottom:20px; color:#991b1b;">
+      {%- assign cancelled_at = order.cancelled_at | time_tag: format: "date_at_time" -%}
+      <strong>Order cancelled</strong> on {{ cancelled_at }}. Reason: {{ order.cancel_reason }}
+    </div>
+  {% endif %}
 
   <div class="grid">
-
     <div class="grid__item medium-up--two-thirds">
-      <p>
-        {%- assign order_date = order.created_at | time_tag: format: "date_at_time" -%}
-        {{ 'customer.order.date_html' | t: date: order_date }}
-      </p>
 
-      {% if order.cancelled %}
-        <div class="errors">
-          {%- assign cancelled_at = order.cancelled_at | time_tag: format: "date_at_time" -%}
-          <p class="h5">{{ 'customer.order.cancelled_html' | t: date: cancelled_at }}</p>
-          <p>{{ 'customer.order.cancelled_reason' | t: reason: order.cancel_reason }}</p>
-        </div>
-      {% endif %}
+      <div style="background:#fff; border:1px solid #ECECF3; border-radius:16px; padding:24px; box-shadow:0 2px 12px rgba(17,25,54,0.07); margin-bottom:20px;">
+        <h3 style="color:#111936; font-weight:800; font-size:16px; margin-bottom:18px;">🛍️ Order Items</h3>
 
-      <table class="table--responsive table--small-text">
-        <thead>
-          <tr>
-            <th>{{ 'customer.order.product' | t }}</th>
-            <th>{{ 'customer.order.sku' | t }}</th>
-            <th>{{ 'customer.order.price' | t }}</th>
-            <th class="text-right">{{ 'customer.order.quantity' | t }}</th>
-            <th class="text-right table--small-hide">{{ 'customer.order.total' | t }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for line_item in order.line_items %}
-          <tr id="{{ line_item.key }}" class="table__section">
-            <td data-label="{{ 'customer.order.product' | t }}">
-              {{ line_item.title | link_to: line_item.product.url }}
-              {%- assign property_size = line_item.properties | size -%}
-              {% unless line_item.selling_plan_allocation == nil and property_size == 0 %}
-                <p>
-                  {% unless line_item.selling_plan_allocation == nil %}
-                    {{ line_item.selling_plan_allocation.selling_plan.name }}
-                  {% endunless %}
-                  {% if property_size != 0 %}
-                    {% for property in line_item.properties %}
-                      {% assign property_first_char = property.first | slice: 0 %}
-                      {% if property.last != blank and property_first_char != '_' %}
-                        {{ property.first }}:
-                        {% if property.last contains '/uploads/' %}
-                          <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
-                        {% else %}
-                          {{ property.last }}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                </p>
-              {% endunless %}
-              {%- if line_item.line_level_discount_allocations != blank -%}
-                {%- for discount_allocation in line_item.line_level_discount_allocations -%}
-                  <p class="cart__discount">
-                    {{ discount_allocation.discount_application.title }} (-{{ discount_allocation.amount | money }})
-                  </p>
-                {%- endfor -%}
-              {%- endif -%}
-              {% if line_item.fulfillment %}
-                <div class="note">
-                  {%- assign created_at = line_item.fulfillment.created_at | time_tag: format: 'date' -%}
-                  {{ 'customer.order.fulfilled_at_html' | t: date: created_at }}
-                  {% if line_item.fulfillment.tracking_number %}
-                    <a href="{{ line_item.fulfillment.tracking_url }}">{{ line_item.fulfillment.tracking_company }} #{{ line_item.fulfillment.tracking_number}}</a>
-                  {% endif %}
-                </div>
+        {% for line_item in order.line_items %}
+          <div style="display:flex; gap:14px; padding:14px 0; border-bottom:1px solid #ECECF3; align-items:flex-start; {% if forloop.last %}border-bottom:none; padding-bottom:0;{% endif %}">
+            {% if line_item.image %}
+              <img src="{{ line_item.image | img_url: '80x80', crop: 'center' }}" alt="{{ line_item.title | escape }}" width="70" height="70" style="border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid #ECECF3;" loading="lazy">
+            {% endif %}
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; color:#111936; font-size:14px; margin-bottom:3px;">{{ line_item.title | link_to: line_item.product.url }}</div>
+              {% if line_item.variant.title != 'Default Title' %}
+                <div style="font-size:12px; color:#6b7280; margin-bottom:4px;">{{ line_item.variant.title }}</div>
               {% endif %}
-            </td>
-            <td data-label="{{ 'customer.order.sku' | t }}">{{ line_item.sku }}</td>
-            <td data-label="{{ 'customer.order.price' | t }}">
-              {%- if line_item.original_price != line_item.final_price -%}
-                <span class="visually-hidden">{{ 'products.general.regular_price' | t }}</span>
-                <span class="cart__price cart__price--strikethrough">{{ line_item.original_price | money }}</span>
-                <span class="visually-hidden">{{ 'products.general.sale_price' | t }}</span>
-                <span class="cart__discount">{{ line_item.final_price | money }}</span>
-              {%- else -%}
-                {{ line_item.original_price | money }}
-              {%- endif -%}
+              {% if line_item.sku != blank %}
+                <div style="font-size:11px; color:#9ca3af;">SKU: {{ line_item.sku }}</div>
+              {% endif %}
+            </div>
+            <div style="text-align:right; flex-shrink:0;">
+              <div style="font-weight:700; color:#111936; font-size:14px;">
+                {%- if line_item.original_price != line_item.final_price -%}
+                  <span style="text-decoration:line-through; color:#9ca3af; font-size:12px; font-weight:400;">{{ line_item.original_price | money }}</span>
+                  {{ line_item.final_price | money }}
+                {%- else -%}
+                  {{ line_item.original_price | money }}
+                {%- endif -%}
+              </div>
+              <div style="font-size:12px; color:#6b7280; margin-top:2px;">Qty: {{ line_item.quantity }}</div>
+              <div style="font-size:13px; font-weight:700; color:#F72568; margin-top:4px;">
+                {{ line_item.final_line_price | money }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
 
-              {%- if line_item.unit_price_measurement -%}
-                {%- capture unit_price_base_unit -%}
-                  <span class="unit-price-base">
-                    {%- if line_item.unit_price_measurement -%}
-                      {%- if line_item.unit_price_measurement.reference_value != 1 -%}
-                        {{ line_item.unit_price_measurement.reference_value }}
-                      {%- endif -%}
-                      {{ line_item.unit_price_measurement.reference_unit }}
-                    {%- endif -%}
-                  </span>
-                {%- endcapture -%}
-
-                <div class="product__unit-price">{{ line_item.unit_price | money }}/{{ unit_price_base_unit }}</div>
-              {%- endif -%}
-            </td>
-            <td data-label="{{ 'customer.order.quantity' | t }}" class="text-right">{{ line_item.quantity }}</td>
-            <td class="table--small-hide text-right">
-              {%- if line_item.original_line_price != line_item.final_line_price -%}
-                <span class="visually-hidden">{{ 'products.general.regular_price' | t }}</span>
-                <span class="cart__price cart__price--strikethrough">{{ line_item.original_line_price | money }}</span>
-                <span class="visually-hidden">{{ 'products.general.sale_price' | t }}</span>
-                <span class="cart__discount">{{ line_item.final_line_price | money }}</span>
-              {%- else -%}
-                {{ line_item.original_line_price | money }}
-              {%- endif -%}
-            </td>
-          </tr>
+        <div style="margin-top:20px; padding-top:16px; border-top:2px solid #ECECF3;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:#6b7280;">
+            <span>Subtotal</span><span style="color:#111936; font-weight:600;">{{ order.line_items_subtotal_price | money }}</span>
+          </div>
+          {% for discount_application in order.discount_applications %}
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:#F72568;">
+              <span>Discount: {{ discount_application.title }}</span>
+              <span>-{{ discount_application.total_allocated_amount | money }}</span>
+            </div>
           {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4" class="table--small-hide">{{ 'customer.order.subtotal' | t }}</td>
-            <td data-label="{{ 'customer.order.subtotal' | t }}" class="text-right">{{ order.line_items_subtotal_price | money }}</td>
-          </tr>
-
-          {%- if order.cart_level_discount_applications != blank -%}
-            <tr>
-              {%- for discount_application in order.cart_level_discount_applications -%}
-                <th scope="row" colspan="4" class="small--hide">
-                  {{ 'customer.order.discount' | t }} | {{ discount_application.title }}
-                </th>
-                <td class="text-right" data-label="{{ 'customer.order.discount' | t }}">
-                  <div class="cart__discount">
-                    <span class="medium-up--hide">
-                      {{ discount_application.title }}
-                    </span>
-                    <span class="cart__discount">-{{ discount_application.total_allocated_amount | money }}</span>
-                  </div>
-                </td>
-              {%- endfor -%}
-            </tr>
-          {%- endif -%}
-
           {% for shipping_method in order.shipping_methods %}
-          <tr>
-            <td colspan="4" class="table--small-hide">{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</td>
-            <td data-label="{{ 'customer.order.shipping' | t }}" class="text-right">{{ shipping_method.price | money }}</td>
-          </tr>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:#6b7280;">
+              <span>Shipping ({{ shipping_method.title }})</span>
+              <span style="color:#111936; font-weight:600;">{{ shipping_method.price | money }}</span>
+            </div>
           {% endfor %}
-
           {% for tax_line in order.tax_lines %}
-            <tr>
-              <td colspan="4" class="table--small-hide">{{ 'customer.order.tax' | t }} ({{ tax_line.title }} {{ tax_line.rate | times: 100 }}%)</td>
-              <td data-label="{{ 'customer.order.tax' | t }}" class="text-right">{{ tax_line.price | money }}</td>
-            </tr>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:#6b7280;">
+              <span>{{ tax_line.title }} ({{ tax_line.rate | times: 100 }}%)</span>
+              <span style="color:#111936; font-weight:600;">{{ tax_line.price | money }}</span>
+            </div>
           {% endfor %}
-
-          <tr>
-            <td colspan="4" class="table__title table--small-hide">{{ 'customer.order.total' | t }}</td>
-            <td data-label="{{ 'customer.order.total' | t }}" class="table__title text-right">{{ order.total_price | money }} {{ order.currency }}</td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <hr class="hr--small hr--clear">
+          <div style="display:flex; justify-content:space-between; padding-top:10px; border-top:1px solid #ECECF3; font-size:17px; font-weight:800; color:#111936;">
+            <span>Total</span>
+            <span style="color:#F72568;">{{ order.total_price | money }} {{ order.currency }}</span>
+          </div>
+        </div>
+      </div>
 
     </div>
 
     <div class="grid__item medium-up--one-third">
 
-      <h3>{{ 'customer.order.billing_address' | t }}</h3>
-
-      <p><strong>{{ 'customer.order.payment_status' | t }}:</strong> {{ order.financial_status_label }}</p>
-
-      <p class="h5">{{ order.billing_address.name }}</p>
-      <p>
-        {% if order.billing_address.company != blank %}
-          {{ order.billing_address.company }}<br>
-        {% endif %}
-        {{ order.billing_address.street }}<br>
-        {{ order.billing_address.city }}<br>
-        {% if order.billing_address.province != blank %}
-          {{ order.billing_address.province }}<br>
-        {% endif %}
-        {{ order.billing_address.zip | upcase }}<br>
-        {{ order.billing_address.country }}<br>
-        {{ order.billing_address.phone }}
-      </p>
-
-      <hr class="hr--medium">
+      <div style="background:#fff; border:1px solid #ECECF3; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(17,25,54,0.07); margin-bottom:16px;">
+        <h4 style="color:#111936; font-weight:800; font-size:15px; margin-bottom:14px;">💳 Payment</h4>
+        <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; background:#f3f4f6; color:#374151; border-radius:20px; padding:4px 12px; font-weight:600; margin-bottom:14px;">
+          {{ order.financial_status_label }}
+        </div>
+        <div style="font-size:13px; color:#6b7280; line-height:1.7;">
+          <strong style="color:#111936; display:block; margin-bottom:4px;">{{ order.billing_address.name }}</strong>
+          {{ order.billing_address.address1 }}<br>
+          {% if order.billing_address.address2 != blank %}{{ order.billing_address.address2 }}<br>{% endif %}
+          {{ order.billing_address.city }}, {{ order.billing_address.country }}<br>
+          {{ order.billing_address.phone }}
+        </div>
+      </div>
 
       {%- if order.shipping_address != blank -%}
-        <h3>{{ 'customer.order.shipping_address' | t }}</h3>
+        <div style="background:#fff; border:1px solid #ECECF3; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(17,25,54,0.07); margin-bottom:16px;">
+          <h4 style="color:#111936; font-weight:800; font-size:15px; margin-bottom:10px;">🚚 Shipping</h4>
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; background:#EDFFF5; color:#065f46; border-radius:20px; padding:4px 12px; font-weight:600; margin-bottom:14px;">
+            {{ order.fulfillment_status_label }}
+          </div>
+          <div style="font-size:13px; color:#6b7280; line-height:1.7;">
+            <strong style="color:#111936; display:block; margin-bottom:4px;">{{ order.shipping_address.name }}</strong>
+            {{ order.shipping_address.address1 }}<br>
+            {% if order.shipping_address.address2 != blank %}{{ order.shipping_address.address2 }}<br>{% endif %}
+            {{ order.shipping_address.city }}, {{ order.shipping_address.country }}<br>
+            {{ order.shipping_address.phone }}
+          </div>
+        </div>
       {%- endif -%}
 
-      <p><strong>{{ 'customer.order.fulfillment_status' | t }}:</strong> {{ order.fulfillment_status_label }}</p>
-
-      {%- if order.shipping_address != blank -%}
-        <p class="h5">{{ order.shipping_address.name }}</p>
-        <p>
-          {% if order.shipping_address.company != blank %}
-            {{ order.shipping_address.company }}<br>
-          {% endif %}
-          {{ order.shipping_address.street }}<br>
-          {{ order.shipping_address.city }}<br>
-          {% if order.shipping_address.province != blank %}
-            {{ order.shipping_address.province }}<br>
-          {% endif %}
-          {{ order.shipping_address.zip | upcase }}<br>
-          {{ order.shipping_address.country }}<br>
-          {{ order.shipping_address.phone }}
-        </p>
-      {%- endif -%}
+      <div style="background:#FFF0F6; border:1px solid #fbd0e2; border-radius:16px; padding:20px;">
+        <h4 style="color:#111936; font-weight:800; font-size:14px; margin-bottom:8px;">Need Help?</h4>
+        <p style="font-size:12px; color:#374151; margin-bottom:12px;">Contact us on WhatsApp for quick support with your order.</p>
+        <a href="https://wa.me/{{ wa_number }}?text={{ wa_track_msg | url_encode }}" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; border-radius:10px; padding:10px 16px; font-weight:700; font-size:13px; text-decoration:none;">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592z"/></svg>
+          Track Order on WhatsApp
+        </a>
+      </div>
 
     </div>
-
   </div>
+
+  <div style="margin-top:16px;">
+    <a href="{{ routes.account_url }}" style="color:#F72568; font-weight:600; font-size:13px; text-decoration:none;">← Back to My Account</a>
+  </div>
+
 </div>

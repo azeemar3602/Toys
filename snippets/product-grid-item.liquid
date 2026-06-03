@@ -28,6 +28,19 @@
       endif
     endfor
   endif
+
+  assign is_best_seller = false
+  assign is_new_arrival = false
+  assign is_hot_deal = false
+  if product_tags contains 'best-seller' or product_tags contains 'bestseller' or product_tags contains 'Best Seller'
+    assign is_best_seller = true
+  endif
+  if product_tags contains 'new-arrival' or product_tags contains 'new' or product_tags contains 'New'
+    assign is_new_arrival = true
+  endif
+  if product_tags contains 'hot-deal' or product_tags contains 'hot' or product_tags contains 'Hot Deal'
+    assign is_hot_deal = true
+  endif
 -%}
 
 <div class="grid__item grid-product {{ grid_item_width }}{% if settings.quick_shop_enable %} grid-product__has-quick-shop{% endif %}" data-aos="row-of-{{ per_row }}" data-product-handle="{{ product.handle }}" data-product-id="{{ product.id }}">
@@ -35,6 +48,18 @@
     {%- if has_custom_label -%}
       <div class="grid-product__tag grid-product__tag--custom">
         {{ custom_label }}
+      </div>
+    {%- elsif is_best_seller and product.available -%}
+      <div class="grid-product__tag grid-product__tag--best-seller">
+        ⭐ Best Seller
+      </div>
+    {%- elsif is_new_arrival and product.available -%}
+      <div class="grid-product__tag grid-product__tag--new">
+        ✨ New
+      </div>
+    {%- elsif is_hot_deal and product.available -%}
+      <div class="grid-product__tag grid-product__tag--hot">
+        🔥 Hot Deal
       </div>
     {%- else -%}
       {%- unless product.available -%}
@@ -44,7 +69,8 @@
       {%- endunless -%}
       {%- if on_sale and product.available -%}
         <div class="grid-product__tag grid-product__tag--sale">
-          {{ 'products.general.sale' | t }}
+          {%- assign save_pct = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+          -{{ save_pct }}%
         </div>
       {%- endif -%}
     {%- endif -%}
@@ -190,6 +216,10 @@
           {%- endif -%}
         </div>
       </div>
+    </a>
+    <a href="{{ product.url | within: collection }}" class="toy-atc-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+      Add to Cart
     </a>
   </div>
   {%- if settings.enable_swatches -%}

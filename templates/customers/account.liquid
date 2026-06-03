@@ -1,64 +1,99 @@
 {%- paginate customer.orders by 20 -%}
 
 <div class="page-width page-content">
-  <header class="section-header{% unless settings.type_headers_align_text %} section-header--with-link{% endunless %}">
-    <h1 class="section-header__title">{{ 'customer.account.title' | t }}</h1>
-    <a href="{{ routes.account_logout_url }}" class="btn btn--secondary btn--small section-header__link">{{ 'layout.customer.log_out'| t }}</a>
-  </header>
+
+  <div class="toy-account-header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:32px;">
+    <div>
+      <h1 style="color:#111936; font-weight:800; margin:0 0 4px; font-size:28px;">👋 Welcome back, {{ customer.first_name }}!</h1>
+      <p style="color:#6b7280; margin:0; font-size:14px;">Manage your orders and account details below.</p>
+    </div>
+    <a href="{{ routes.account_logout_url }}" class="btn btn--secondary btn--small">Log out</a>
+  </div>
 
   <div class="grid">
-
     <div class="grid__item medium-up--two-thirds">
-      <h2>{{ 'customer.orders.title' | t }}</h2>
 
-      {%- if customer.orders.size != 0 -%}
+      <div style="background:#fff; border:1px solid #ECECF3; border-radius:16px; padding:24px; box-shadow:0 2px 12px rgba(17,25,54,0.07); margin-bottom:24px;">
+        <h2 style="color:#111936; font-weight:800; font-size:18px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+          📦 Your Orders
+          <span style="font-size:13px; background:#FFF0F6; color:#F72568; border-radius:20px; padding:2px 10px; font-weight:600;">{{ customer.orders.size }}</span>
+        </h2>
 
-        <table class="table--responsive table--small-text">
-          <thead>
-            <tr>
-              <th>{{ 'customer.orders.order_number' | t }}</th>
-              <th>{{ 'customer.orders.date' | t }}</th>
-              <th>{{ 'customer.orders.payment_status' | t }}</th>
-              <th>{{ 'customer.orders.fulfillment_status' | t }}</th>
-              <th>{{ 'customer.orders.total' | t }}</th>
-            </tr>
-          </thead>
-          <tbody>
+        {%- if customer.orders.size != 0 -%}
+          <div class="toy-orders-list">
             {%- for order in customer.orders -%}
-              <tr class="table__section">
-                <td data-label="{{ 'customer.orders.order_number' | t }}">{{ order.name | link_to: order.customer_url }}</td>
-                <td data-label="{{ 'customer.orders.date' | t }}">{{ order.created_at | time_tag: format: 'date' }}</td>
-                <td data-label="{{ 'customer.orders.payment_status' | t }}">{{ order.financial_status_label }}</td>
-                <td data-label="{{ 'customer.orders.fulfillment_status' | t }}">{{ order.fulfillment_status_label }}</td>
-                <td data-label="{{ 'customer.orders.total' | t }}">{{ order.total_price | money }}</td>
-              </tr>
+              <div style="border:1px solid #ECECF3; border-radius:12px; padding:16px; margin-bottom:12px; background:#fafafa;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                  <div>
+                    <div style="font-weight:700; color:#111936; font-size:15px; margin-bottom:4px;">
+                      <a href="{{ order.customer_url }}" style="color:#111936; text-decoration:none;">Order {{ order.name }}</a>
+                    </div>
+                    <div style="font-size:12px; color:#6b7280; margin-bottom:8px;">{{ order.created_at | time_tag: format: 'date' }}</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                      <span style="font-size:11px; background:#f3f4f6; color:#374151; border-radius:20px; padding:3px 10px; font-weight:600;">
+                        💳 {{ order.financial_status_label }}
+                      </span>
+                      <span style="font-size:11px; background:#EDFFF5; color:#065f46; border-radius:20px; padding:3px 10px; font-weight:600;">
+                        🚚 {{ order.fulfillment_status_label }}
+                      </span>
+                    </div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-weight:800; color:#111936; font-size:17px; margin-bottom:8px;">{{ order.total_price | money }}</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                      <a href="{{ order.customer_url }}" style="font-size:12px; color:#F72568; font-weight:600; text-decoration:none; border:1px solid #F72568; border-radius:8px; padding:4px 12px;">View Order</a>
+                      {%- assign wa_number = settings.whatsapp_number | default: '923376246084' | remove: '+' | remove: ' ' | remove: '-' -%}
+                      {%- capture wa_msg -%}Assalam o Alaikum Toylicious, I want to track my order. My order number is {{ order.name }}.{%- endcapture -%}
+                      <a href="https://wa.me/{{ wa_number }}?text={{ wa_msg | url_encode }}" target="_blank" rel="noopener" style="font-size:12px; color:#fff; background:#25D366; font-weight:600; text-decoration:none; border-radius:8px; padding:4px 12px; display:inline-flex; align-items:center; gap:4px;">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+                        Track
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             {%- endfor -%}
-          </tbody>
-        </table>
+          </div>
 
-        <hr class="hr--clear">
+          {%- if paginate.pages > 1 -%}
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endif -%}
 
-      {%- else -%}
+        {%- else -%}
+          <div style="text-align:center; padding:40px 20px; color:#9ca3af;">
+            <div style="font-size:48px; margin-bottom:12px;">🛒</div>
+            <p style="font-size:15px; font-weight:600; color:#374151; margin-bottom:8px;">No orders yet</p>
+            <p style="font-size:13px;">When you place your first order, it will appear here.</p>
+            <a href="{{ routes.root_url }}collections/all" class="btn btn--primary" style="margin-top:16px; display:inline-block;">Shop Toys</a>
+          </div>
+        {%- endif -%}
+      </div>
 
-        <p>{{ 'customer.orders.none' | t }}</p>
-
-      {%- endif -%}
     </div>
 
     <div class="grid__item medium-up--one-third">
-      <h3>{{ 'customer.account.details' | t }}</h3>
 
-      <p class="h5">{{ customer.name }}</p>
+      <div style="background:#fff; border:1px solid #ECECF3; border-radius:16px; padding:24px; box-shadow:0 2px 12px rgba(17,25,54,0.07); margin-bottom:16px;">
+        <h3 style="color:#111936; font-weight:800; font-size:16px; margin-bottom:16px;">👤 Account Details</h3>
+        <p style="font-weight:700; color:#111936; margin-bottom:4px;">{{ customer.name }}</p>
+        <div style="color:#6b7280; font-size:14px; line-height:1.7;">{{ customer.default_address | format_address }}</div>
+        <a href="{{ routes.account_addresses_url }}" style="display:inline-block; margin-top:12px; font-size:13px; color:#F72568; font-weight:600;">
+          Manage Addresses ({{ customer.addresses_count }})
+        </a>
+      </div>
 
-      {{ customer.default_address | format_address }}
+      <div style="background:#FFF0F6; border:1px solid #fbd0e2; border-radius:16px; padding:20px;">
+        <h4 style="color:#111936; font-weight:800; font-size:15px; margin-bottom:10px;">💬 Need Help?</h4>
+        <p style="font-size:13px; color:#374151; margin-bottom:14px;">Our support team is ready to help you with your orders and queries.</p>
+        {%- assign wa_num = settings.whatsapp_number | default: '923376246084' | remove: '+' | remove: ' ' | remove: '-' -%}
+        <a href="https://wa.me/{{ wa_num }}" target="_blank" rel="noopener" class="toy-wa-track-btn" style="display:flex; width:100%; box-sizing:border-box; justify-content:center;">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+          Chat on WhatsApp
+        </a>
+      </div>
 
-      <p><a href="{{ routes.account_addresses_url }}" class="text-link">{{ 'customer.account.view_addresses' | t }} ({{ customer.addresses_count }})</a></p>
     </div>
-
   </div>
 
-  {%- if paginate.pages > 1 -%}
-    {%- render 'pagination', paginate: paginate -%}
-  {%- endif -%}
 </div>
 {%- endpaginate -%}
