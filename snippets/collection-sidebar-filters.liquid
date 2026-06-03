@@ -1,38 +1,95 @@
-<ul class="no-bullets tag-list tag-list--active-tags">
-  {%- for filter in collection.filters -%}
-    {%- assign filter_index = forloop.index -%}
+{%- liquid
+  assign nav_menu = linklists['main-menu']
+  assign current_url = request.path
+-%}
 
-    {%- for filter_value in filter.active_values -%}
-      <li class="tag tag--remove">
-        <a class="btn btn--small" href="{{ filter_value.url_to_remove }}">
-          {{ filter_value.label | escape }}
-        </a>
-        <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-close" viewBox="0 0 64 64"><path d="M19 17.61l27.12 27.13m0-27.12L19 44.74"/></svg>
-      </li>
+<!-- ══ COLLECTION NAVIGATION SIDEBAR ══════════════════════ -->
+<div class="toy-sidebar-section toy-sidebar-nav">
+  <div class="toy-sidebar-section__header">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+    Shop Categories
+  </div>
+
+  <nav class="toy-sidebar-nav__list">
+    {%- for link in nav_menu.links -%}
+      {%- liquid
+        assign link_active = false
+        if current_url contains link.url and link.url != '/'
+          assign link_active = true
+        endif
+        assign link_handle = link.title | handle
+        assign skip_link = false
+        if link_handle == 'order-tracking' or link_handle == 'faqs' or link_handle == 'faq'
+          assign skip_link = true
+        endif
+      -%}
+      {%- unless skip_link -%}
+        {%- if link.links.size > 0 -%}
+          <details class="toy-sidebar-accordion{% if link_active %} is-open{% endif %}"
+                   {% if link_active %}open{% endif %}>
+            <summary class="toy-sidebar-accordion__trigger">
+              <a href="{{ link.url }}"
+                 class="toy-sidebar-accordion__title{% if link_active %} is-active{% endif %}"
+                 onclick="event.stopPropagation()">
+                {{- link.title -}}
+              </a>
+              <svg class="toy-sidebar-accordion__chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <ul class="toy-sidebar-children no-bullets">
+              {%- for child in link.links -%}
+                {%- liquid
+                  assign child_active = false
+                  if current_url contains child.url and child.url != '/'
+                    assign child_active = true
+                  endif
+                -%}
+                <li>
+                  <a href="{{ child.url }}"
+                     class="toy-sidebar-child-link{% if child_active %} is-active{% endif %}">
+                    {{- child.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </details>
+        {%- else -%}
+          <a href="{{ link.url }}"
+             class="toy-sidebar-top-link{% if link_active %} is-active{% endif %}">
+            {{- link.title -}}
+          </a>
+        {%- endif -%}
+      {%- endunless -%}
     {%- endfor -%}
-  {%- endfor -%}
-</ul>
+  </nav>
+</div>
 
-<form class="filter-form">
-  {%- for filter in collection.filters -%}
-    {%- capture filter_id -%}filter-{{ filter.label | handleize }}{%- endcapture -%}
-    {%- assign filter_index = forloop.index -%}
-    {%- assign collapsed_state = section.settings.collapsed -%}
+<!-- ══ NATIVE SHOPIFY FILTERS (Availability + Price) ═══════ -->
+{%- if collection.filters.size > 0 -%}
+  <ul class="no-bullets tag-list tag-list--active-tags toy-sidebar-active-tags">
+    {%- for filter in collection.filters -%}
+      {%- for filter_value in filter.active_values -%}
+        <li class="toy-active-tag">
+          <a href="{{ filter_value.url_to_remove }}" class="toy-active-tag__link">
+            {{ filter_value.label | escape }}
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          </a>
+        </li>
+      {%- endfor -%}
+    {%- endfor -%}
+  </ul>
 
-    <div class="collection-sidebar__group--{{ filter_index }}">
-      <div class="collection-sidebar__group">
-        {%- render 'collection-sidebar-filter-trigger',
-              id: filter_id,
-              location: location,
-              title: filter.label,
-              index: filter_index,
-              collapsed_state: collapsed_state -%}
-        <div
-          id="{{ location }}-{{ filter_index }}-{{ filter_id }}"
-          class="collapsible-content collapsible-content--sidebar{% unless collapsed_state %} is-open{% endunless %}"
-          data-collapsible-id="{{ filter_id }}"
-          {% unless collapsed_state %}style="height: auto;"{% endunless %}>
-          <div class="collapsible-content__inner">
+  <form class="filter-form" id="{{ location }}-filter-form">
+    {%- for filter in collection.filters -%}
+      {%- capture filter_id -%}filter-{{ filter.label | handleize }}{%- endcapture -%}
+      {%- assign filter_index = forloop.index -%}
+
+      <div class="toy-sidebar-section toy-sidebar-section--filter">
+        <details class="toy-sidebar-accordion is-open" open>
+          <summary class="toy-sidebar-accordion__trigger toy-sidebar-section__header">
+            {{ filter.label | escape }}
+            <svg class="toy-sidebar-accordion__chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <div class="toy-sidebar-filter-body">
             {%- case filter.type -%}
               {%- when 'list' -%}
                 {%- liquid
@@ -48,88 +105,58 @@
                     endif
                   endif
                 -%}
-
-                <ul class="no-bullets tag-list">
-                  {%- assign tag_count = filter.values.size -%}
+                <ul class="no-bullets toy-filter-list">
                   {%- for filter_value in filter.values -%}
-                    {%- liquid
-                      assign tag_count = tag_count | plus: 1
-                      assign filter_value_index = forloop.index
-
-                      assign color_file_name = filter_value.label | handle | append: '.' | append: swatch_file_extension
-                      assign color_image = color_file_name | file_img_url: '50x50' | prepend: 'https:' | split: '?' | first
-                      assign color_swatch_fallback = filter_value.label | split: ' ' | last | handle
-                    -%}
-
-                    <li class="tag{% if filter_value.active %} tag--active{% endif %}{% if is_color %} tag--swatch{% endif %}{% if filter_value.count == 0%} hide{% endif %}">
-                      <label class="tag__checkbox-wrapper text-label">
-                        <input
-                          type="checkbox"
-                          class="tag__input"
-                          name="{{ filter_value.param_name }}"
-                          value="{{ filter_value.value }}"
-                          {% if filter_value.active -%}checked{%- endif %}>
-                        {%- if is_color -%}
-                          <span
-                            class="color-swatch color-swatch--filter color-swatch--{{ filter_value.label | handle }}"
-                            title="{{ filter_value.label }}"
-                            style="background-color: {{ color_swatch_fallback }};{% if images[color_file_name] != blank %}  background-image: url({{ color_image }});{% endif %}"
-                          >
-                            {{ filter_value.label }}
+                    {%- if filter_value.count > 0 or filter_value.active -%}
+                      <li class="toy-filter-item">
+                        <label class="toy-filter-label">
+                          <input
+                            type="checkbox"
+                            class="toy-filter-checkbox"
+                            name="{{ filter_value.param_name }}"
+                            value="{{ filter_value.value }}"
+                            {% if filter_value.active %}checked{% endif %}
+                            onchange="this.closest('form').submit()">
+                          <span class="toy-filter-check"></span>
+                          <span class="toy-filter-text">
+                            {{ filter_value.label | escape }}
+                            <span class="toy-filter-count">({{ filter_value.count }})</span>
                           </span>
-                          <span class="tag__text hide">{{ filter_value.label | escape }}</span>
-                        {%- else -%}
-                          <span class="tag__checkbox"></span>
-                          <span>
-                            <span class="tag__text">{{ filter_value.label | escape }}</span> ({{ filter_value.count }})
-                          </span>
-                        {%- endif -%}
-                      </label>
-                    </li>
+                        </label>
+                      </li>
+                    {%- endif -%}
                   {%- endfor -%}
                 </ul>
 
-                {%- if tag_count == 0 -%}
-                  {%- style -%}
-                    .collection-sidebar__group--{{ filter_index }} { display: none; }
-                  {%- endstyle -%}
-                {%- endif -%}
-              {%- when 'price_range'-%}
-                {% comment %} Comma code from Dawn {% endcomment %}
-                {% liquid
+              {%- when 'price_range' -%}
+                {%- liquid
                   assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
                   assign uses_comma_decimals = false
-
                   if currencies_using_comma_decimals contains cart.currency.iso_code
                     assign uses_comma_decimals = true
                   endif
-
                   assign filter_min_value = filter.min_value.value | money_without_currency | replace: ',', ''
                   assign filter_max_value = filter.max_value.value | money_without_currency | replace: ',', ''
                   assign filter_range_min = filter.range_min | money_without_currency | replace: ',', ''
                   assign filter_range_max = filter.range_max | money_without_currency | replace: ',', ''
-
                   if uses_comma_decimals
                     if filter.min_value.value
                       assign filter_min_value = filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
                     endif
-
                     if filter.max_value.value
                       assign filter_max_value = filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
                     endif
-
                     assign filter_range_min = filter.range_min | money_without_currency | replace: '.', '' | replace: ',', '.'
                     assign filter_range_max = filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.'
                   endif
-                %}
-                <div
-                  class="price-range"
-                  data-min-value="{{ filter_min_value }}"
-                  data-min-name="{{ filter.min_value.param_name }}"
-                  data-min="{{ filter_range_min }}"
-                  data-max-value="{{ filter_max_value }}"
-                  data-max-name="{{ filter.max_value.param_name }}"
-                  data-max="{{ filter_range_max }}">
+                -%}
+                <div class="price-range"
+                     data-min-value="{{ filter_min_value }}"
+                     data-min-name="{{ filter.min_value.param_name }}"
+                     data-min="{{ filter_range_min }}"
+                     data-max-value="{{ filter_max_value }}"
+                     data-max-name="{{ filter.max_value.param_name }}"
+                     data-max="{{ filter_range_max }}">
                   <div class="price-range__display-wrapper">
                     <span class="price-range__display-min">{{ filter_min_value }}</span>
                     <span class="price-range__display-max">{{ filter_max_value }}</span>
@@ -137,21 +164,17 @@
                   <div class="price-range__slider-wrapper">
                     <div class="price-range__slider"></div>
                   </div>
-                  <input
-                    class="price-range__input price-range__input-min"
-                    name="{{ filter.min_value.param_name }}"
-                    value="{{ filter_min_value }}"
-                    readonly>
-                  <input
-                    class="price-range__input price-range__input-max"
-                    name="{{ filter.max_value.param_name }}"
-                    value="{{ filter_max_value }}"
-                    readonly>
+                  <input class="price-range__input price-range__input-min"
+                         name="{{ filter.min_value.param_name }}"
+                         value="{{ filter_min_value }}" readonly>
+                  <input class="price-range__input price-range__input-max"
+                         name="{{ filter.max_value.param_name }}"
+                         value="{{ filter_max_value }}" readonly>
                 </div>
             {%- endcase -%}
           </div>
-        </div>
+        </details>
       </div>
-    </div>
-  {%- endfor -%}
-</form>
+    {%- endfor -%}
+  </form>
+{%- endif -%}
