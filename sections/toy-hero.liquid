@@ -14,24 +14,27 @@
 
 <style>
 .toy-hero-wrap {
-  display: block;
+  display: block !important;
   width: 100%;
   line-height: 0;
   overflow: hidden;
-  text-decoration: none;
+  text-decoration: none !important;
+  font-size: 0;
 }
-.toy-hero-wrap img {
+.toy-hero-desktop,
+.toy-hero-mobile {
   display: block;
-  width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
   max-width: 100%;
+  border: none;
+  outline: none;
 }
-.toy-hero-desktop { display: block; }
-.toy-hero-mobile  { display: none;  }
+.toy-hero-mobile { display: none !important; }
 
 @media (max-width: 767px) {
-  .toy-hero-desktop { display: none;  }
-  .toy-hero-mobile  { display: block; }
+  .toy-hero-desktop { display: none !important; }
+  .toy-hero-mobile  { display: block !important; }
 }
 </style>
 
