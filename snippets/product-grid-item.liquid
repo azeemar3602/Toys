@@ -83,16 +83,16 @@
       {{- '<!-- Product image -->' }}
       <div class="tpc-media__img-wrap">
         {%- if preview_image != blank -%}
-          <img class="tpc-media__img lazyload"
-               data-src="{{ img_url }}"
-               data-widths="[360,540,720,900]"
-               data-aspectratio="{{ preview_image.aspect_ratio }}"
-               data-sizes="auto"
+          <img class="tpc-media__img"
+               src="{{ preview_image | img_url: '480x480', crop: 'center' }}"
+               srcset="{{ preview_image | img_url: '240x240', crop: 'center' }} 240w,
+                       {{ preview_image | img_url: '360x360', crop: 'center' }} 360w,
+                       {{ preview_image | img_url: '480x480', crop: 'center' }} 480w,
+                       {{ preview_image | img_url: '600x600', crop: 'center' }} 600w"
+               sizes="(max-width:749px) 40vw, 22vw"
                alt="{{ preview_image.alt | escape }}"
-               width="600" height="600">
-          <noscript>
-            <img class="tpc-media__img" src="{{ preview_image | img_url: '400x' }}" alt="{{ preview_image.alt | escape }}">
-          </noscript>
+               loading="lazy"
+               decoding="async">
         {%- else -%}
           {{ 'product-1' | placeholder_svg_tag: 'tpc-media__img tpc-media__img--placeholder' }}
         {%- endif -%}
