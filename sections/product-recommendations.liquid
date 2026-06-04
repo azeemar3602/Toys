@@ -1,5 +1,6 @@
 {%- liquid
   assign recommend_products = true
+  assign related_collection = nil
 
   if recommendations.products and recommendations.products_count > 0
     assign related_collection = recommendations
@@ -18,23 +19,43 @@
   endfor
 
   assign number_of_products = section.settings.related_count
+
+  assign grid_item_width = 'small--one-half medium-up--one-quarter'
+  case number_of_products
+    when 2
+      assign grid_item_width = 'medium-up--one-half'
+    when 3
+      assign grid_item_width = 'small--one-half medium-up--one-third'
+    when 4
+      assign grid_item_width = 'small--one-half medium-up--one-quarter'
+    when 5
+      assign grid_item_width = 'small--one-half medium-up--one-fifth'
+    when 6
+      assign grid_item_width = 'small--one-half medium-up--one-sixth'
+  endcase
 -%}
 
 {%- if section.settings.show_product_recommendations -%}
+
+  {%- comment -%}
+    AJAX recommendations wrapper — theme JS populates this.
+    Hidden by default; JS shows it only when products are returned.
+  {%- endcomment -%}
   <div
     id="Recommendations-{{ product.id }}"
+    class="toy-recs-section"
     data-section-id="{{ product.id }}"
     data-section-type="product-recommendations"
     data-enable="{{ recommend_products }}"
     data-product-id="{{ product.id }}"
     data-url="{{ routes.product_recommendations_url }}"
-    data-limit="{{ number_of_products }}">
-
+    data-limit="{{ number_of_products }}"
+    style="display:none;">
     <div
       data-section-id="{{ product.id }}"
       data-subsection
       data-section-type="collection-template"
-      class="index-section">
+      class="index-section toy-recs-inner">
       <div class="page-width">
         <header class="section-header">
           <h3 class="section-header__title">
@@ -42,82 +63,141 @@
           </h3>
         </header>
       </div>
-
-      <div class="page-width page-width--flush-small">
-        <div class="grid-overflow-wrapper">
-          {%- if recommend_products -%}
-            <div class="product-recommendations-placeholder">
-              {% comment %}
-                This content is visually hidden and replaced when recommended products show up
-              {% endcomment %}
-              <div class="grid grid--uniform visually-invisible" aria-hidden="true">
-                {%- render 'product-grid-item', product: product, grid_item_width: grid_item_width -%}
-              </div>
-            </div>
-          {%- endif -%}
-          {%- if related_collection.products_count > 1 -%}
-            {%- liquid
-              case number_of_products
-                when 1
-                  assign grid_item_width = ''
-                when 2
-                  assign grid_item_width = 'medium-up--one-half'
-                when 3
-                  assign grid_item_width = 'small--one-half medium-up--one-third'
-                when 4
-                  assign grid_item_width = 'small--one-half medium-up--one-quarter'
-                when 5
-                  assign grid_item_width = 'small--one-half medium-up--one-fifth'
-                when 6
-                  assign grid_item_width = 'small--one-half medium-up--one-sixth'
-              endcase
-            -%}
-            <div class="product-recommendations">
-              <div class="grid grid--uniform" data-aos="overflow__animation">
-                {%- for product in related_collection.products limit: number_of_products -%}
-                  {%- render 'product-grid-item', product: product, grid_item_width: grid_item_width -%}
-                {%- endfor -%}
-              </div>
-
-              {%- if settings.quick_shop_enable -%}
-                {%- for product in related_collection.products -%}
-                  {%- render 'quick-shop-modal', product: product -%}
-                {%- endfor -%}
-              {%- endif -%}
-            </div>
-          {%- endif -%}
+      <div class="page-width">
+        <div class="grid grid--uniform toy-recs-grid">
+          {%- comment -%}Products injected here by theme AJAX JS{%- endcomment -%}
         </div>
       </div>
     </div>
   </div>
+
+  {%- comment -%}
+    Static fallback: same-collection products (no AJAX needed, renders on server).
+    Only shown when AJAX recommendations are disabled/unavailable AND
+    a related_collection exists with products other than the current one.
+  {%- endcomment -%}
+  {%- unless recommend_products -%}
+    {%- assign fallback_products = related_collection.products
+        | where: 'id', product.id
+        | map: 'handle' -%}
+    {%- assign fallback_count = 0 -%}
+    {%- for p in related_collection.products -%}
+      {%- if p.id != product.id -%}
+        {%- assign fallback_count = fallback_count | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if fallback_count > 0 -%}
+      <div class="index-section toy-recs-section toy-recs-static">
+        <div class="page-width">
+          <header class="section-header">
+            <h3 class="section-header__title">{{ section.settings.product_recommendations_heading }}</h3>
+          </header>
+        </div>
+        <div class="page-width">
+          <div class="grid grid--uniform toy-recs-grid">
+            {%- for p in related_collection.products limit: number_of_products -%}
+              {%- unless p.id == product.id -%}
+                {%- render 'product-grid-item', product: p, grid_item_width: grid_item_width, per_row: number_of_products -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endunless -%}
+
 {%- endif -%}
 
-{% schema %}
-  {
-    "name": "Product recommendations",
-    "settings": [
-      {
-        "type": "checkbox",
-        "id": "show_product_recommendations",
-        "label": "Show dynamic recommendations",
-        "info": "Dynamic recommendations change and improve with time. [Learn more](https://help.shopify.com/en/themes/development/recommended-products)",
-        "default": true
-      },
-      {
-        "type": "text",
-        "id": "product_recommendations_heading",
-        "label": "Heading",
-        "default": "You may also like"
-      },
-      {
-        "type": "range",
-        "id": "related_count",
-        "label": "Number of related products",
-        "default": 5,
-        "min": 2,
-        "max": 6,
-        "step": 1
+<style>
+.toy-recs-section { background: var(--toy-cream, #FFFDF8); }
+.toy-recs-inner { padding: 0; }
+.toy-recs-grid {
+  gap: 20px 0;
+  margin-bottom: 40px;
+}
+.toy-recs-grid .grid__item { padding: 0 10px; }
+@media (max-width: 749px) {
+  .toy-recs-grid { gap: 12px 0; }
+  .toy-recs-grid .grid__item { padding: 0 5px; }
+}
+</style>
+
+<script>
+(function() {
+  var recsEl = document.getElementById('Recommendations-{{ product.id }}');
+  if (!recsEl) return;
+
+  var enable = recsEl.getAttribute('data-enable') === 'true';
+  if (!enable) return;
+
+  var productId = recsEl.getAttribute('data-product-id');
+  var limit     = recsEl.getAttribute('data-limit') || 4;
+  var baseUrl   = recsEl.getAttribute('data-url');
+
+  if (!baseUrl) return;
+
+  var url = baseUrl + '?product_id=' + productId + '&limit=' + limit + '&section_id=product-recommendations';
+
+  fetch(url)
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      var parser = new DOMParser();
+      var doc    = parser.parseFromString(html, 'text/html');
+      var grid   = doc.querySelector('.product-recommendations .grid, .grid.grid--uniform');
+      var items  = doc.querySelectorAll('.grid-product, .grid__item');
+
+      if (!items || items.length === 0) {
+        recsEl.style.display = 'none';
+        return;
       }
-    ]
-  }
+
+      var targetGrid = recsEl.querySelector('.toy-recs-grid');
+      if (targetGrid) {
+        /* Render each product-grid-item */
+        items.forEach(function(item) {
+          if (item.querySelector('.tpc-card, .grid-product__content, .tpc-media')) {
+            targetGrid.appendChild(item.cloneNode(true));
+          }
+        });
+        if (targetGrid.children.length > 0) {
+          recsEl.style.display = '';
+        }
+      }
+    })
+    .catch(function() {
+      /* Silently hide on error */
+      if (recsEl) recsEl.style.display = 'none';
+    });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_product_recommendations",
+      "label": "Show dynamic recommendations",
+      "info": "Dynamic recommendations change and improve with time. [Learn more](https://help.shopify.com/en/themes/development/recommended-products)",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "product_recommendations_heading",
+      "label": "Heading",
+      "default": "You Might Also Like"
+    },
+    {
+      "type": "range",
+      "id": "related_count",
+      "label": "Number of related products",
+      "default": 4,
+      "min": 2,
+      "max": 6,
+      "step": 1
+    }
+  ]
+}
 {% endschema %}

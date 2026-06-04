@@ -1,6 +1,6 @@
 {%- liquid
-  assign grid_item_width = 'small--one-half medium-up--one-fifth'
-  assign row_of = 5
+  assign grid_item_width = 'small--one-half medium-up--one-quarter'
+  assign row_of = 4
 
   case section.settings.recent_count
     when 2
@@ -13,55 +13,149 @@
       assign grid_item_width = 'small--one-half medium-up--one-quarter'
       assign row_of = 4
     when 6
-      assign grid_item_width = 'small--one-half medium-up--one-sixth'
-      assign row_of = 6
+      assign grid_item_width = 'small--one-half medium-up--one-third'
+      assign row_of = 3
     when 8
       assign grid_item_width = 'small--one-half medium-up--one-quarter'
       assign row_of = 4
   endcase
 -%}
 
+<!-- Recently Viewed — hidden until JS confirms products exist -->
 <div
-  data-subsection
+  id="RecentlyViewedSection-{{ section.id }}"
+  class="toy-rv-section index-section"
   data-section-id="{{ section.id }}"
   data-section-type="recently-viewed"
   data-product-handle="{{ product.handle }}"
   data-recent-count="{{ section.settings.recent_count }}"
   data-grid-item-class="{{ grid_item_width }}"
-  data-row-of="{{ row_of }}">
-  <hr class="hr--large">
-  <div class="index-section index-section--small">
-    <div class="page-width">
-      <header class="section-header">
-        <h3 class="section-header__title">{{ 'products.general.recent_products' | t }}</h3>
-      </header>
-    </div>
+  data-row-of="{{ row_of }}"
+  style="display:none;">
 
-    <div class="page-width page-width--flush-small">
-      <div class="grid-overflow-wrapper">
-        <div id="RecentlyViewed-{{ section.id }}" class="grid grid--uniform" data-aos="overflow__animation"></div>
-      </div>
-    </div>
+  <hr class="hr--large">
+  <div class="page-width">
+    <header class="section-header">
+      <h3 class="section-header__title">{{ 'products.general.recent_products' | t }}</h3>
+    </header>
+    <div id="RecentlyViewedGrid-{{ section.id }}" class="grid grid--uniform toy-rv-grid"></div>
   </div>
 </div>
 
-{% schema %}
-  {
-    "name": "Recently viewed",
-    "settings": [
-      {
-        "type": "paragraph",
-        "content": "Recently viewed products are only visible when browsing outside of the editor"
-      },
-      {
-        "type": "range",
-        "id": "recent_count",
-        "label": "Number of recent products",
-        "default": 5,
-        "min": 2,
-        "max": 10,
-        "step": 1
-      }
-    ]
+<style>
+.toy-rv-section { background: var(--toy-cream, #FFFDF8); }
+.toy-rv-grid {
+  gap: 20px 0;
+  margin-bottom: 40px;
+}
+.toy-rv-grid .grid__item { padding: 0 10px; }
+@media (max-width: 749px) {
+  .toy-rv-grid { gap: 12px 0; }
+  .toy-rv-grid .grid__item { padding: 0 5px; }
+}
+</style>
+
+<script>
+(function() {
+  var STORAGE_KEY   = 'toy_recently_viewed';
+  var MAX_ITEMS     = 8;
+  var currentHandle = '{{ product.handle | escape }}';
+  var sectionEl     = document.getElementById('RecentlyViewedSection-{{ section.id }}');
+  var gridEl        = document.getElementById('RecentlyViewedGrid-{{ section.id }}');
+  var limit         = parseInt('{{ section.settings.recent_count }}', 10) || 4;
+  var gridClass     = '{{ grid_item_width }}';
+
+  if (!sectionEl || !gridEl) return;
+
+  /* ── 1. Save current product to localStorage ─────────── */
+  function getViewed() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch(e) { return []; }
   }
+  function saveViewed(arr) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+    catch(e) {}
+  }
+
+  var viewed = getViewed().filter(function(h) { return h !== currentHandle; });
+  viewed.unshift(currentHandle);
+  if (viewed.length > MAX_ITEMS) viewed = viewed.slice(0, MAX_ITEMS);
+  saveViewed(viewed);
+
+  /* ── 2. Get handles to display (exclude current) ──────── */
+  var toShow = viewed.filter(function(h) { return h !== currentHandle; }).slice(0, limit);
+  if (toShow.length === 0) { sectionEl.style.display = 'none'; return; }
+
+  /* ── 3. Fetch product cards one by one ────────────────── */
+  var loaded = 0;
+  var fragment = document.createDocumentFragment();
+  var errors   = 0;
+
+  toShow.forEach(function(handle, i) {
+    fetch('/products/' + handle + '?view=card-snippet', { method: 'GET' })
+      .then(function(r) {
+        if (!r.ok) throw new Error('404');
+        return r.text();
+      })
+      .then(function(html) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        var card = tmp.querySelector('.grid__item, .tpc-card, .grid-product');
+        if (card) {
+          /* Wrap in grid item if it isn't already */
+          if (!card.classList.contains('grid__item')) {
+            var wrap = document.createElement('div');
+            wrap.className = 'grid__item grid-product ' + gridClass;
+            wrap.appendChild(card);
+            fragment.appendChild(wrap);
+          } else {
+            card.classList.add(gridClass.split(' ')[0], gridClass.split(' ')[1] || '');
+            fragment.appendChild(card);
+          }
+        }
+      })
+      .catch(function() { errors++; })
+      .finally(function() {
+        loaded++;
+        if (loaded === toShow.length) {
+          gridEl.appendChild(fragment);
+          if (gridEl.children.length > 0) {
+            sectionEl.style.display = '';
+          }
+        }
+      });
+  });
+
+  /* Fallback: use native recently-viewed if theme JS populated it */
+  setTimeout(function() {
+    /* If our fetch failed entirely, try native grid */
+    var native = document.getElementById('RecentlyViewed-{{ section.id }}');
+    if (native && native.children.length > 0 && gridEl.children.length === 0) {
+      while (native.firstChild) gridEl.appendChild(native.firstChild);
+      sectionEl.style.display = '';
+    }
+  }, 2500);
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Recently viewed",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Recently viewed products are only visible when browsing outside of the editor"
+    },
+    {
+      "type": "range",
+      "id": "recent_count",
+      "label": "Number of recent products",
+      "default": 4,
+      "min": 2,
+      "max": 8,
+      "step": 1
+    }
+  ]
+}
 {% endschema %}
