@@ -22,6 +22,177 @@
   video_style: section.settings.product_video_style
 -%}
 
+
+<script>
+/* ══ Toylicious Variant Price Updater ═══════════════════════
+   Runs on DOMContentLoaded. Works alongside (or as fallback
+   to) the Impulse theme's own variant JS.
+════════════════════════════════════════════════════════════ */
+(function() {
+
+  function initVariantUpdater() {
+    var section = document.querySelector('[data-section-type="product"]');
+    if (!section) return;
+
+    /* ── Get variant data from the textarea the theme outputs ── */
+    var variantJson = section.querySelector('[data-variant-json]');
+    if (!variantJson) return;
+
+    var variants;
+    try { variants = JSON.parse(variantJson.textContent || variantJson.value); }
+    catch(e) { return; }
+    if (!variants || !variants.length) return;
+
+    /* ── DOM targets ─────────────────────────────────────────── */
+    var priceEl       = section.querySelector('[data-product-price]');
+    var compareEl     = section.querySelector('[data-compare-price]');
+    var savingsEl     = section.querySelector('[data-save-price]');
+    var masterSelect  = section.querySelector('[data-product-select]');
+    var atcBtn        = section.querySelector('[data-add-to-cart]');
+    var atcText       = section.querySelector('[data-add-to-cart-text]');
+    var priceWrap     = section.querySelector('[data-product-price-wrap]');
+
+    /* ── Money formatter (Rs. format) ───────────────────────── */
+    function formatMoney(cents) {
+      var amount = (cents / 100).toFixed(2);
+      /* Shopify's money_format for this store is Rs.{{amount}} */
+      return 'Rs.' + amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    /* ── Find variant matching currently selected options ────── */
+    function getSelectedOptions() {
+      var inputs  = section.querySelectorAll('[data-variant-input]:checked');
+      var options = [];
+      inputs.forEach(function(inp) { options.push(inp.value); });
+      /* Fallback: single-option select */
+      if (!options.length && masterSelect) {
+        var sel = masterSelect.options[masterSelect.selectedIndex];
+        if (sel) options.push(sel.text.split(' - ')[0]);
+      }
+      return options;
+    }
+
+    function findVariant(selectedOptions) {
+      return variants.find(function(v) {
+        return v.options.every(function(opt, i) {
+          return opt === selectedOptions[i];
+        });
+      }) || null;
+    }
+
+    /* ── Update all dynamic product fields ──────────────────── */
+    function updateProduct(variant) {
+      if (!variant) return;
+
+      /* 1. Price */
+      if (priceEl) {
+        priceEl.textContent = formatMoney(variant.price);
+        priceEl.classList.toggle('on-sale', variant.compare_at_price > variant.price);
+      }
+
+      /* 2. Compare-at price */
+      if (compareEl) {
+        if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+          compareEl.textContent = formatMoney(variant.compare_at_price);
+          if (priceWrap) priceWrap.classList.remove('hide');
+        } else {
+          compareEl.textContent = '';
+          if (priceWrap) priceWrap.classList.add('hide');
+        }
+      }
+
+      /* 3. Save % */
+      if (savingsEl) {
+        if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+          var savePct = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
+          savingsEl.textContent = 'Save ' + savePct + '%';
+          savingsEl.classList.remove('hide');
+        } else {
+          savingsEl.textContent = '';
+          savingsEl.classList.add('hide');
+        }
+      }
+
+      /* 4. Hidden select — passes variant ID to cart form */
+      if (masterSelect) {
+        for (var i = 0; i < masterSelect.options.length; i++) {
+          if (parseInt(masterSelect.options[i].value, 10) === variant.id) {
+            masterSelect.selectedIndex = i;
+            break;
+          }
+        }
+        /* Trigger native change for any other JS listeners */
+        masterSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      /* 5. Add to Cart button availability */
+      if (atcBtn) {
+        if (variant.available) {
+          atcBtn.removeAttribute('disabled');
+          if (atcText) atcText.textContent = atcText.getAttribute('data-default-text') || 'Add to Cart';
+        } else {
+          atcBtn.setAttribute('disabled', 'disabled');
+          if (atcText) atcText.textContent = 'Sold Out';
+        }
+      }
+
+      /* 6. Variant button selected state */
+      section.querySelectorAll('[data-variant-input]').forEach(function(inp) {
+        var lbl = inp.nextElementSibling;
+        if (lbl && lbl.classList.contains('variant__button-label')) {
+          lbl.classList.toggle('toy-variant-selected', inp.checked);
+        }
+      });
+    }
+
+    /* ── Listen for radio button changes ─────────────────────── */
+    section.addEventListener('change', function(e) {
+      if (e.target && e.target.hasAttribute('data-variant-input')) {
+        var opts    = getSelectedOptions();
+        var variant = findVariant(opts);
+        updateProduct(variant);
+      }
+    });
+
+    /* ── Init with currently selected variant ────────────────── */
+    var initOpts    = getSelectedOptions();
+    var initVariant = findVariant(initOpts);
+    if (initVariant) updateProduct(initVariant);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVariantUpdater);
+  } else {
+    initVariantUpdater();
+  }
+
+})();
+</script>
+
+<style>
+/* ── Variant button selected state ──────────────────────── */
+.variant__button-label {
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.variant__button-label.toy-variant-selected,
+.variant__input--color-swatch + .variant__button-label.toy-variant-selected,
+input[data-variant-input]:checked + .variant__button-label {
+  border: 2.5px solid #111936 !important;
+  background: #111936 !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.variant__button-label:hover {
+  border-color: #111936 !important;
+}
+.variant__button-label.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+</style>
+
 {% schema %}
   {
     "name": "Product",
