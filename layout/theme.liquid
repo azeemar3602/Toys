@@ -248,14 +248,56 @@ body{background-color:var(--toy-cream)!important}
 .grid-uniform .grid__item{margin-bottom:24px}
 
 @media(max-width:749px){
-  .tpc-card{border-radius:18px}
-  .tpc-media{padding:14px;border-radius:14px 14px 0 0}
-  .tpc-media__img{max-width:82%}
-  .tpc-body{padding:10px 12px 12px}
-  .tpc-title{font-size:13px}
-  .tpc-price-current{font-size:15px}
-  .tpc-atc-btn{min-height:42px;font-size:13px;border-radius:12px}
-  .grid-uniform .grid__item{margin-bottom:14px}
+  /* ── Mobile 2-col grid ─────────────────────────────────── */
+  .grid-uniform { padding: 0 12px; }
+  .grid-uniform .grid__item { margin-bottom: 12px; }
+
+  /* Card */
+  .tpc-card { border-radius: 18px; }
+
+  /* Image area */
+  .tpc-media {
+    padding: 14px 14px 10px;
+    border-radius: 14px 14px 0 0;
+    min-height: 150px;
+  }
+  .tpc-media__img { max-width: 82%; max-height: 150px; }
+
+  /* Body */
+  .tpc-body { padding: 10px 11px 12px; gap: 0; }
+
+  /* Title — 1 line, ellipsis */
+  .tpc-title {
+    font-size: 12.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin-bottom: 3px;
+  }
+  .tpc-subtitle { font-size: 11px; margin-bottom: 5px; }
+
+  /* Price */
+  .tpc-price-row { margin: 5px 0 8px; gap: 5px; }
+  .tpc-price-current { font-size: 14px !important; }
+  .tpc-price-compare { font-size: 11px !important; }
+
+  /* Badge */
+  .tpc-badge { font-size: 9.5px; padding: 4px 8px; top: 8px; left: 8px; }
+
+  /* Wishlist */
+  .tpc-wishlist { width: 32px; height: 32px; top: 8px; right: 8px; }
+  .tpc-wishlist svg { width: 14px; height: 14px; }
+
+  /* ATC */
+  .tpc-atc-btn {
+    min-height: 42px !important;
+    font-size: 12.5px !important;
+    border-radius: 12px !important;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .tpc-atc-btn svg { width: 14px; height: 14px; }
+  .tpc-form { margin: 0; }
 }
 
 /* ── Legacy card overrides (keep theme from breaking) ─────── */

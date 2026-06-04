@@ -187,7 +187,7 @@
   color: #d1d5db;
 }
 
-/* Mobile */
+/* ── Tablet ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .toy-reviews__inner {
     grid-template-columns: 1fr;
@@ -195,28 +195,76 @@
     gap: 20px;
   }
   .toy-reviews__summary {
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    gap: 12px;
-    text-align: center;
+    gap: 14px;
     padding: 20px;
+    text-align: center;
+  }
+  .toy-reviews__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
 }
+
+/* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  .toy-reviews { padding: 36px 0 32px; }
+
+  .toy-reviews__card { padding: 0 16px; }
+
+  .toy-reviews__heading h2 { font-size: 22px; }
+  .toy-reviews__heading p  { font-size: 14px; }
+
+  /* Summary: compact horizontal strip */
+  .toy-reviews__summary {
+    padding: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-radius: 14px;
+  }
+  .toy-reviews__summary-star { width: 44px; height: 44px; font-size: 22px; }
+  .toy-reviews__summary-score { font-size: 30px; }
+
+  /* Swipeable scroll-snap cards */
   .toy-reviews__grid {
-    grid-template-columns: 1fr;
-    overflow-x: auto;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
-    padding-bottom: 8px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    grid-template-columns: unset !important;
+    gap: 12px !important;
+    padding: 4px 2px 16px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .toy-reviews__grid::-webkit-scrollbar { display: none; }
+
   .toy-review-card {
-    min-width: 260px;
-    flex-shrink: 0;
+    flex: 0 0 84vw !important;
+    max-width: 84vw !important;
+    min-width: unset !important;
+    scroll-snap-align: start;
+    border-radius: 16px;
+    padding: 16px;
+    gap: 8px;
   }
-  .toy-reviews { padding: 40px 0 36px; }
+
+  /* Clamp review text to 4 lines */
+  .toy-review-card__text {
+    font-size: 13px !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .toy-review-card__name  { font-size: 13px; }
+  .toy-review-card__stars { font-size: 14px; }
 }
 /* ══ END REVIEWS ══════════════════════════════════════════ */
 </style>
