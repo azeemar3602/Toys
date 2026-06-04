@@ -193,6 +193,66 @@ input[data-variant-input]:checked + .variant__button-label {
 }
 </style>
 
+
+<script>
+/* ── Product tab/description toggle fallback ─────────────── */
+(function() {
+  function initToggles() {
+    document.querySelectorAll('.collapsible-trigger-btn--borders').forEach(function(btn) {
+      if (btn.dataset.toyInit) return; /* prevent duplicate init */
+      btn.dataset.toyInit = '1';
+
+      btn.addEventListener('click', function() {
+        var targetId = btn.getAttribute('aria-controls');
+        var content  = targetId ? document.getElementById(targetId) : null;
+
+        if (!content) {
+          /* Fallback: next sibling with collapsible-content class */
+          content = btn.nextElementSibling;
+          while (content && !content.classList.contains('collapsible-content')) {
+            content = content.nextElementSibling;
+          }
+        }
+        if (!content) return;
+
+        var isOpen = btn.classList.contains('is-open');
+
+        if (isOpen) {
+          /* Close */
+          content.style.height = content.scrollHeight + 'px';
+          requestAnimationFrame(function() {
+            content.style.height = '0px';
+          });
+          btn.classList.remove('is-open');
+          content.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          /* Open */
+          content.style.height = '0px';
+          content.classList.add('is-open');
+          btn.classList.add('is-open');
+          btn.setAttribute('aria-expanded', 'true');
+          requestAnimationFrame(function() {
+            content.style.height = content.scrollHeight + 'px';
+            /* Remove fixed height after transition so content can reflow */
+            content.addEventListener('transitionend', function onEnd() {
+              content.removeEventListener('transitionend', onEnd);
+              if (content.classList.contains('is-open')) content.style.height = 'auto';
+            });
+          });
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initToggles);
+  } else {
+    initToggles();
+  }
+})();
+</script>
+
 {% schema %}
   {
     "name": "Product",

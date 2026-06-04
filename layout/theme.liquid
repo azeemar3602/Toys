@@ -585,6 +585,68 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   .collection-grid__wrapper .grid__item { padding: 0 6px; }
   .collection-grid__wrapper .grid { gap: 14px 0; }
 }
+/* ── Product description toggles (tabs) ─────────────────── */
+.collapsibles-wrapper--border-bottom {
+  border-bottom: 1px solid #ECECF3 !important;
+}
+.collapsibles-wrapper--border-bottom:first-child {
+  border-top: 1px solid #ECECF3;
+}
+
+/* Toggle button */
+.collapsible-trigger-btn--borders {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 4px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  color: #111936 !important;
+  text-transform: uppercase !important;
+  text-align: left;
+  transition: color 0.15s;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.collapsible-trigger-btn--borders:hover { color: #F72568 !important; }
+.collapsible-trigger-btn--borders.is-open { color: #F72568 !important; }
+
+/* Icons (chevron) */
+.collapsible-trigger-btn--borders .collapsible-trigger__icon,
+.collapsible-trigger-btn--borders .icon-chevron-down {
+  flex-shrink: 0;
+  transition: transform 0.25s;
+  color: #9ca3af;
+}
+.collapsible-trigger-btn--borders.is-open .collapsible-trigger__icon,
+.collapsible-trigger-btn--borders.is-open .icon-chevron-down {
+  transform: rotate(180deg);
+  color: #F72568;
+}
+
+/* Content — hidden by default, transitions open */
+.collapsible-content {
+  overflow: hidden;
+  transition: height 0.3s cubic-bezier(0.4,0,0.2,1);
+  height: 0;
+}
+.collapsible-content.is-open { height: auto; }
+.collapsible-content__inner {
+  padding: 0 4px 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+}
+.collapsible-content__inner p { margin-bottom: 10px; }
+.collapsible-content__inner p:last-child { margin-bottom: 0; }
+
+/* ── END Product description toggles ─────────────────────── */
+
 /* ── END COLLECTION PAGE ─────────────────────────────────── */
 
 /* ══════════════════════════════════════════════════════════
