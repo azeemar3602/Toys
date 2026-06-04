@@ -888,6 +888,55 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
 }
 .toy-price-chip:hover { background: #fff0f6; color: #F72568; border-color: #fba4c0; }
 
+/* ── Homepage product grid — mobile 2-col fix ────────────── */
+/* Override grid-overflow-wrapper to be a proper 2-col grid on mobile
+   (not horizontal scroll) for featured-collection sections */
+@media (max-width: 749px) {
+  /* Remove horizontal scroll from homepage product sections */
+  .grid-overflow-wrapper {
+    overflow: visible !important;
+  }
+  .grid-overflow-wrapper .grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+  .grid-overflow-wrapper .grid__item,
+  .grid-overflow-wrapper .grid-product {
+    flex: 0 0 calc(50% - 8px) !important;
+    max-width: calc(50% - 8px) !important;
+    width: calc(50% - 8px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Page-width flush override — remove negative margins */
+  .page-width--flush-small {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Grid gap via row gap */
+  .grid-overflow-wrapper .grid.grid--uniform {
+    gap: 12px !important;
+  }
+
+  /* Section header margin on homepage */
+  #CollectionSection-{{ section.id }} .section-header,
+  [id^="CollectionSection-"] .section-header {
+    margin-bottom: 20px !important;
+  }
+
+  /* View all item — full width */
+  .grid-overflow-wrapper .grid__item--view-all {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+}
+
 /* ── Mobile sidebar drawer improvements ─────────────────── */
 @media (max-width: 768px) {
   .toy-sidebar-section { padding: 12px 14px; }
