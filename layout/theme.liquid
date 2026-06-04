@@ -629,21 +629,51 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   color: #F72568;
 }
 
-/* Content — hidden by default, transitions open */
-.collapsible-content {
+/* Content — only collapse product page tabs, NOT footer */
+/* Product tab content */
+.product-single__form ~ div .collapsible-content,
+.product-block--tab .collapsible-content,
+.collapsibles-wrapper--border-bottom .collapsible-content {
   overflow: hidden;
   transition: height 0.3s cubic-bezier(0.4,0,0.2,1);
   height: 0;
 }
-.collapsible-content.is-open { height: auto; }
-.collapsible-content__inner {
+.product-block--tab .collapsible-content.is-open,
+.collapsibles-wrapper--border-bottom .collapsible-content.is-open { height: auto; }
+
+/* Product tab inner content */
+.collapsibles-wrapper--border-bottom .collapsible-content__inner {
   padding: 0 4px 18px;
   font-size: 14px;
   line-height: 1.7;
   color: #374151;
 }
-.collapsible-content__inner p { margin-bottom: 10px; }
-.collapsible-content__inner p:last-child { margin-bottom: 0; }
+.collapsibles-wrapper--border-bottom .collapsible-content__inner p { margin-bottom: 10px; }
+.collapsibles-wrapper--border-bottom .collapsible-content__inner p:last-child { margin-bottom: 0; }
+
+/* Footer — always show content on desktop, collapse on mobile */
+@media (min-width: 769px) {
+  .site-footer .collapsible-content { height: auto !important; overflow: visible !important; }
+}
+@media (max-width: 768px) {
+  .site-footer .collapsible-content { overflow: hidden; transition: height 0.3s; height: 0; }
+  .site-footer .collapsible-content.is-open { height: auto; }
+}
+
+/* Footer links list */
+.site-footer__linklist li { margin-bottom: 8px; }
+.site-footer__linklist a {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.72) !important;
+  text-decoration: none !important;
+  transition: color 0.15s, padding-left 0.15s;
+  display: inline-block;
+}
+.site-footer__linklist a:hover { color: #F72568 !important; padding-left: 4px; }
+
+/* Footer custom text (Contact Us) */
+.site-footer .footer__collapsible p,
+.site-footer .footer__collapsible { font-size: 13.5px; line-height: 1.8; color: rgba(255,255,255,0.72); }
 
 /* ── END Product description toggles ─────────────────────── */
 

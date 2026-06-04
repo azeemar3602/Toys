@@ -1,23 +1,53 @@
-{%- if linklists[block.settings.menu].links.size > 0 -%}
+{%- liquid
+  assign menu_links = linklists[block.settings.menu].links
+  assign menu_title  = linklists[block.settings.menu].title | default: block.settings.menu | capitalize
+  assign has_menu    = false
+  if menu_links.size > 0
+    assign has_menu = true
+  endif
+-%}
+
+{%- if has_menu or block.settings.menu == 'quick-links' -%}
   {%- if block.settings.show_footer_title -%}
     <p class="h4 footer__title small--hide">
-      {{ linklists[block.settings.menu].title }}
+      {%- if has_menu -%}{{ menu_title }}{%- else -%}Quick Links{%- endif -%}
     </p>
     <button type="button" class="h4 footer__title collapsible-trigger collapsible-trigger-btn medium-up--hide" aria-controls="Footer-{{ block.id }}">
-      {{ linklists[block.settings.menu].title }}
+      {%- if has_menu -%}{{ menu_title }}{%- else -%}Quick Links{%- endif -%}
       {%- render 'collapsible-icons' -%}
     </button>
   {%- endif -%}
-  <div
-    {% if block.settings.show_footer_title %}
-      id="Footer-{{ block.id }}" class="collapsible-content collapsible-content--small"
-    {% endif %}>
+
+  <div {% if block.settings.show_footer_title %}id="Footer-{{ block.id }}" class="collapsible-content collapsible-content--small"{% endif %}>
     <div class="collapsible-content__inner">
       <div class="footer__collapsible{% unless block.settings.show_footer_title %} footer_collapsible--disabled{% endunless %}">
         <ul class="no-bullets site-footer__linklist">
-          {%- for link in linklists[block.settings.menu].links -%}
-            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-          {%- endfor -%}
+
+          {%- if has_menu -%}
+            {%- for link in menu_links -%}
+              <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+            {%- endfor -%}
+          {%- else -%}
+            {{- '<!-- Fallback: Shopify built-in policy pages -->' }}
+            <li><a href="/collections/all">All Products</a></li>
+            <li><a href="/pages/faqs">FAQs</a></li>
+            <li><a href="/pages/order-tracking">Order Tracking</a></li>
+            <li><a href="/collections/new-arrivals">New Arrivals</a></li>
+            <li><a href="/collections/clearance-sale">Clearance Sale</a></li>
+            {%- if shop.privacy_policy.body != blank -%}
+              <li><a href="{{ shop.privacy_policy.url }}">{{ shop.privacy_policy.title }}</a></li>
+            {%- endif -%}
+            {%- if shop.terms_of_service.body != blank -%}
+              <li><a href="{{ shop.terms_of_service.url }}">{{ shop.terms_of_service.title }}</a></li>
+            {%- endif -%}
+            {%- if shop.refund_policy.body != blank -%}
+              <li><a href="{{ shop.refund_policy.url }}">{{ shop.refund_policy.title }}</a></li>
+            {%- endif -%}
+            {%- if shop.shipping_policy.body != blank -%}
+              <li><a href="{{ shop.shipping_policy.url }}">{{ shop.shipping_policy.title }}</a></li>
+            {%- endif -%}
+          {%- endif -%}
+
         </ul>
       </div>
     </div>
