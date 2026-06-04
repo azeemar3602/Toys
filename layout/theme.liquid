@@ -748,10 +748,53 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   margin-bottom: 8px;
 }
 
-/* Price apply + quick chips */
+/* ── Price filter ──────────────────────────────────────── */
+.toy-price-filter { margin-top: 4px; }
+.toy-price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.toy-price-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.toy-price-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 8px;
+  transition: border-color 0.15s;
+}
+.toy-price-input-wrap:focus-within { border-color: #F72568; }
+.toy-price-prefix { font-size: 12px; color: #9ca3af; font-weight: 600; flex-shrink: 0; }
+.toy-price-input {
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 4px !important;
+  font-size: 13px !important;
+  color: #111936 !important;
+  font-weight: 600 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  min-width: 0;
+}
+.toy-price-input::placeholder { color: #d1d5db; font-weight: 400; }
+.toy-price-input::-webkit-outer-spin-button,
+.toy-price-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.toy-price-dash { font-size: 14px; color: #9ca3af; flex-shrink: 0; }
 .toy-price-apply-btn {
   width: 100%;
-  margin-top: 12px;
   padding: 9px 0;
   background: #111936;
   color: #fff;
@@ -761,8 +804,24 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .toy-price-apply-btn:hover { background: #F72568; }
+.toy-price-clear-btn {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-decoration: none !important;
+  transition: color 0.15s;
+}
+.toy-price-clear-btn:hover { color: #F72568; }
+
+/* Quick budget chips */
 .toy-price-quick { margin-top: 14px; }
 .toy-price-quick__label {
   font-size: 10.5px;

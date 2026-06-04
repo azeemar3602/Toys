@@ -70,18 +70,31 @@
 {%- if collection.filters.size > 0 -%}
   <ul class="no-bullets tag-list tag-list--active-tags toy-sidebar-active-tags">
     {%- for filter in collection.filters -%}
-      {%- for filter_value in filter.active_values -%}
-        <li class="toy-active-tag">
-          <a href="{{ filter_value.url_to_remove }}" class="toy-active-tag__link">
-            {{ filter_value.label | escape }}
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
-          </a>
-        </li>
-      {%- endfor -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value or filter.max_value.value -%}
+          {%- assign pr_min = filter.min_value.value | default: filter.range_min | divided_by: 100.0 | floor -%}
+          {%- assign pr_max = filter.max_value.value | default: filter.range_max | divided_by: 100.0 | ceil -%}
+          <li class="toy-active-tag">
+            <a href="{{ filter.url_to_remove }}" class="toy-active-tag__link">
+              Rs. {{ pr_min | floor }} – Rs. {{ pr_max | ceil }}
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- else -%}
+        {%- for filter_value in filter.active_values -%}
+          <li class="toy-active-tag">
+            <a href="{{ filter_value.url_to_remove }}" class="toy-active-tag__link">
+              {{ filter_value.label | escape }}
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </a>
+          </li>
+        {%- endfor -%}
+      {%- endif -%}
     {%- endfor -%}
   </ul>
 
-  <form class="filter-form" id="{{ location }}-filter-form">
+  <form class="filter-form" data-filter-form>
     {%- for filter in collection.filters -%}
       {%- capture filter_id -%}filter-{{ filter.label | handleize }}{%- endcapture -%}
       {%- assign filter_index = forloop.index -%}
@@ -133,48 +146,57 @@
 
               {%- when 'price_range' -%}
                 {%- liquid
-                  assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
-                  assign uses_comma_decimals = false
-                  if currencies_using_comma_decimals contains cart.currency.iso_code
-                    assign uses_comma_decimals = true
+                  assign filter_min_value = ''
+                  assign filter_max_value = ''
+                  assign filter_range_min = filter.range_min | divided_by: 100.0 | floor
+                  assign filter_range_max = filter.range_max | divided_by: 100.0 | ceil
+                  if filter.min_value.value
+                    assign filter_min_value = filter.min_value.value | divided_by: 100.0 | floor
                   endif
-                  assign filter_min_value = filter.min_value.value | money_without_currency | replace: ',', ''
-                  assign filter_max_value = filter.max_value.value | money_without_currency | replace: ',', ''
-                  assign filter_range_min = filter.range_min | money_without_currency | replace: ',', ''
-                  assign filter_range_max = filter.range_max | money_without_currency | replace: ',', ''
-                  if uses_comma_decimals
-                    if filter.min_value.value
-                      assign filter_min_value = filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
-                    endif
-                    if filter.max_value.value
-                      assign filter_max_value = filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
-                    endif
-                    assign filter_range_min = filter.range_min | money_without_currency | replace: '.', '' | replace: ',', '.'
-                    assign filter_range_max = filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.'
+                  if filter.max_value.value
+                    assign filter_max_value = filter.max_value.value | divided_by: 100.0 | ceil
                   endif
                 -%}
-                <div class="price-range"
-                     data-min-value="{{ filter_min_value }}"
-                     data-min-name="{{ filter.min_value.param_name }}"
-                     data-min="{{ filter_range_min }}"
-                     data-max-value="{{ filter_max_value }}"
-                     data-max-name="{{ filter.max_value.param_name }}"
-                     data-max="{{ filter_range_max }}">
-                  <div class="price-range__display-wrapper">
-                    <span class="price-range__display-min">Rs.{{ filter_min_value }}</span>
-                    <span class="price-range__display-max">Rs.{{ filter_max_value }}</span>
+                <div class="toy-price-filter">
+                  <div class="toy-price-range-labels">
+                    <span>Rs. {{ filter_range_min }}</span>
+                    <span>Rs. {{ filter_range_max }}+</span>
                   </div>
-                  <div class="price-range__slider-wrapper">
-                    <div class="price-range__slider"></div>
+                  <div class="toy-price-inputs-row">
+                    <div class="toy-price-input-wrap">
+                      <span class="toy-price-prefix">Rs.</span>
+                      <input
+                        type="number"
+                        class="toy-price-input"
+                        name="{{ filter.min_value.param_name }}"
+                        value="{{ filter_min_value }}"
+                        placeholder="Min"
+                        min="{{ filter_range_min }}"
+                        max="{{ filter_range_max }}"
+                        step="1">
+                    </div>
+                    <span class="toy-price-dash">–</span>
+                    <div class="toy-price-input-wrap">
+                      <span class="toy-price-prefix">Rs.</span>
+                      <input
+                        type="number"
+                        class="toy-price-input"
+                        name="{{ filter.max_value.param_name }}"
+                        value="{{ filter_max_value }}"
+                        placeholder="Max"
+                        min="{{ filter_range_min }}"
+                        max="{{ filter_range_max }}"
+                        step="1">
+                    </div>
                   </div>
-                  <input class="price-range__input price-range__input-min"
-                         name="{{ filter.min_value.param_name }}"
-                         value="{{ filter_min_value }}" readonly>
-                  <input class="price-range__input price-range__input-max"
-                         name="{{ filter.max_value.param_name }}"
-                         value="{{ filter_max_value }}" readonly>
+                  <button type="submit" class="toy-price-apply-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                    Apply Price
+                  </button>
+                  {%- if filter.min_value.value or filter.max_value.value -%}
+                    <a href="{{ filter.url_to_remove }}" class="toy-price-clear-btn">✕ Clear price</a>
+                  {%- endif -%}
                 </div>
-                <button type="submit" class="toy-price-apply-btn">Apply Price</button>
 
                 <!-- Quick budget collection links -->
                 <div class="toy-price-quick">
