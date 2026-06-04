@@ -434,69 +434,81 @@ body.toy-filter-open { overflow: hidden !important; position: fixed; width: 100%
 </style>
 
 <script>
-(function() {
-  /* ── Open / Close helpers ──────────────────────────────── */
-  var drawer  = document.getElementById('ToyFilterDrawer');
-  var overlay = document.getElementById('ToyFilterOverlay');
-  var closeBtn = document.getElementById('ToyFilterClose');
+/* ══ TOY FILTER DRAWER — runs after full DOM is ready ═══════ */
+(function initToyFilterDrawer() {
 
-  if (!drawer) return;
+  /* Wait for full DOM — solves the "sidebar renders before button" problem */
+  function setup() {
+    var drawer   = document.getElementById('ToyFilterDrawer');
+    var overlay  = document.getElementById('ToyFilterOverlay');
+    var closeBtn = document.getElementById('ToyFilterClose');
 
-  function openDrawer() {
-    drawer.classList.add('is-open');
-    drawer.setAttribute('aria-hidden', 'false');
-    overlay.classList.add('is-open');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('toy-filter-open');
-    /* Focus close button for a11y */
-    setTimeout(function() { if (closeBtn) closeBtn.focus(); }, 300);
-  }
+    if (!drawer || !overlay) return;
 
-  function closeDrawer() {
-    drawer.classList.remove('is-open');
-    drawer.setAttribute('aria-hidden', 'true');
-    overlay.classList.remove('is-open');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('toy-filter-open');
-  }
+    /* ── Open / Close ──────────────────────────────────────── */
+    function openDrawer() {
+      drawer.classList.add('is-open');
+      drawer.setAttribute('aria-hidden', 'false');
+      overlay.classList.add('is-open');
+      document.body.classList.add('toy-filter-open');
+      if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 280);
+    }
 
-  /* Close on overlay click */
-  if (overlay) overlay.addEventListener('click', closeDrawer);
+    function closeDrawer() {
+      drawer.classList.remove('is-open');
+      drawer.setAttribute('aria-hidden', 'true');
+      overlay.classList.remove('is-open');
+      document.body.classList.remove('toy-filter-open');
+    }
 
-  /* Close button */
-  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    /* Overlay click closes */
+    overlay.addEventListener('click', closeDrawer);
 
-  /* Escape key */
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
-  });
+    /* Close button */
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
 
-  /* ── Hook all filter-open triggers ────────────────────── */
-  function bindTriggers() {
-    /* Native theme button */
-    document.querySelectorAll('.js-drawer-open-collection-filters, [aria-controls="FilterDrawer"], #ToyFilterBtn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
+    /* Escape key */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    /* ── EVENT DELEGATION — catches ANY filter button click ──
+       Uses document-level listener so it works even when the
+       filter button renders AFTER this script executes.       */
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest(
+        '.js-drawer-open-collection-filters, ' +
+        '[aria-controls="FilterDrawer"], ' +
+        '[data-mobile-filter-open]'
+      );
+      if (btn) {
         e.preventDefault();
         e.stopPropagation();
         openDrawer();
+      }
+    }, true); /* useCapture:true — intercepts before theme JS */
+
+    /* ── Mobile filter form ───────────────────────────────── */
+    var mobileForm = document.getElementById('ToyMobileFilterForm');
+    if (mobileForm) {
+      mobileForm.addEventListener('submit', function() {
+        closeDrawer();
       });
-    });
-  }
-  bindTriggers();
+    }
 
-  /* Re-bind after AJAX (theme may re-render the section) */
-  document.addEventListener('shopify:section:load', bindTriggers);
-  document.addEventListener('toyFilterBind', bindTriggers);
-
-  /* ── Mobile filter form submit → close drawer ─────────── */
-  var mobileForm = document.getElementById('ToyMobileFilterForm');
-  if (mobileForm) {
-    /* For checkbox auto-submit, keep drawer open and let page reload */
-    /* For price apply button, just submit */
-    mobileForm.addEventListener('submit', function() {
-      closeDrawer();
-    });
+    /* Mark as initialised */
+    drawer.setAttribute('data-toy-drawer-ready', 'true');
   }
+
+  /* Run on DOMContentLoaded (or immediately if DOM is already ready) */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+
+  /* Re-run after Shopify AJAX section reload */
+  document.addEventListener('shopify:section:load', setup);
 
 })();
 </script>
