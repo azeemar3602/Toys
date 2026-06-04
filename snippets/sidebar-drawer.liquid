@@ -1,23 +1,502 @@
-{%- assign animation_row = 1 -%}
+{%- liquid
+  assign nav_menu = linklists['toylicious-main-menu']
+  if nav_menu == blank or nav_menu.links.size == 0
+    assign nav_menu = linklists['main-menu']
+  endif
+  assign current_url = request.path
+-%}
 
-<div id="FilterDrawer" class="drawer drawer--left">
-  <div class="drawer__contents">
-    <div class="drawer__fixed-header">
-      <div class="drawer__header appear-animation appear-delay-{{ animation_row }}">
-        <div class="h2 drawer__title">
-          {{ 'collections.filters.title_tags' | t }}
-        </div>
-        <div class="drawer__close">
-          <button type="button" class="drawer__close-button js-drawer-close">
-            <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-close" viewBox="0 0 64 64"><path d="M19 17.61l27.12 27.13m0-27.12L19 44.74"/></svg>
-            <span class="icon__fallback-text">{{ 'general.drawers.close_menu' | t }}</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    {%- assign animation_row = animation_row | plus: 1 -%}
-    <div class="drawer__scrollable appear-animation appear-delay-{{ animation_row }}">
-      {%- render 'collection-sidebar-filters', location: 'SidebarDrawer', section: section -%}
-    </div>
+<!-- ══ TOY MOBILE FILTER DRAWER ══════════════════════════════ -->
+<!-- Overlay -->
+<div id="ToyFilterOverlay" class="toy-fdrawer-overlay" aria-hidden="true"></div>
+
+<!-- Drawer -->
+<div id="ToyFilterDrawer" class="toy-fdrawer" role="dialog" aria-modal="true" aria-label="Filters" aria-hidden="true">
+
+  <!-- Header -->
+  <div class="toy-fdrawer__header">
+    <span class="toy-fdrawer__title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h10M4 18h6"/></svg>
+      Filter &amp; Browse
+    </span>
+    <button type="button" id="ToyFilterClose" class="toy-fdrawer__close" aria-label="Close filters">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
+    </button>
   </div>
-</div>
+
+  <!-- Scrollable content -->
+  <div class="toy-fdrawer__body">
+
+    <!-- ── Shop Categories ──────────────────────────────── -->
+    <div class="toy-fdrawer-section">
+      <div class="toy-fdrawer-section__title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        Shop Categories
+      </div>
+      <nav class="toy-fdrawer-nav">
+        {%- for link in nav_menu.links -%}
+          {%- liquid
+            assign link_handle = link.title | handle
+            assign skip_link = false
+            if link_handle == 'order-tracking' or link_handle == 'faqs' or link_handle == 'faq' or link_handle == 'home'
+              assign skip_link = true
+            endif
+            assign link_active = false
+            if current_url contains link.url and link.url != '/'
+              assign link_active = true
+            endif
+          -%}
+          {%- unless skip_link -%}
+            {%- if link.links.size > 0 -%}
+              <details class="toy-fdrawer-acc{% if link_active %} is-open{% endif %}"
+                       {% if link_active %}open{% endif %}>
+                <summary class="toy-fdrawer-acc__trigger">
+                  <a href="{{ link.url }}"
+                     class="toy-fdrawer-acc__title{% if link_active %} is-active{% endif %}"
+                     onclick="event.stopPropagation()">{{- link.title -}}</a>
+                  <svg class="toy-fdrawer-acc__chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <ul class="toy-fdrawer-children no-bullets">
+                  {%- for child in link.links -%}
+                    {%- liquid
+                      assign child_active = false
+                      if current_url contains child.url and child.url != '/'
+                        assign child_active = true
+                      endif
+                    -%}
+                    <li>
+                      <a href="{{ child.url }}"
+                         class="toy-fdrawer-child{% if child_active %} is-active{% endif %}">
+                        {{- child.title -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </details>
+            {%- else -%}
+              <a href="{{ link.url }}"
+                 class="toy-fdrawer-link{% if link_active %} is-active{% endif %}">
+                {{- link.title -}}
+              </a>
+            {%- endif -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      </nav>
+    </div>
+
+    <!-- ── Shopify Filters ──────────────────────────────── -->
+    {%- if collection.filters.size > 0 -%}
+      <form class="filter-form toy-fdrawer-filter-form" id="ToyMobileFilterForm">
+        {%- for filter in collection.filters -%}
+          {%- assign filter_index = forloop.index -%}
+          <div class="toy-fdrawer-section">
+            <details class="toy-fdrawer-acc is-open" open>
+              <summary class="toy-fdrawer-acc__trigger toy-fdrawer-section__title">
+                {{ filter.label | escape }}
+                <svg class="toy-fdrawer-acc__chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div class="toy-fdrawer-filter-body">
+                {%- case filter.type -%}
+
+                  {%- when 'list' -%}
+                    <ul class="no-bullets toy-fdrawer-checklist">
+                      {%- for filter_value in filter.values -%}
+                        {%- if filter_value.count > 0 or filter_value.active -%}
+                          <li>
+                            <label class="toy-fdrawer-check-label">
+                              <input
+                                type="checkbox"
+                                class="toy-filter-checkbox"
+                                name="{{ filter_value.param_name }}"
+                                value="{{ filter_value.value }}"
+                                {% if filter_value.active %}checked{% endif %}
+                                onchange="document.getElementById('ToyMobileFilterForm').submit()">
+                              <span class="toy-filter-check"></span>
+                              <span class="toy-fdrawer-check-text">
+                                {{ filter_value.label | escape }}
+                                <span class="toy-filter-count">({{ filter_value.count }})</span>
+                              </span>
+                            </label>
+                          </li>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </ul>
+
+                  {%- when 'price_range' -%}
+                    {%- liquid
+                      assign filter_min_value = ''
+                      assign filter_max_value = ''
+                      assign filter_range_min = filter.range_min | divided_by: 100.0 | floor
+                      assign filter_range_max = filter.range_max | divided_by: 100.0 | ceil
+                      if filter.min_value.value
+                        assign filter_min_value = filter.min_value.value | divided_by: 100.0 | floor
+                      endif
+                      if filter.max_value.value
+                        assign filter_max_value = filter.max_value.value | divided_by: 100.0 | ceil
+                      endif
+                    -%}
+                    <div class="toy-price-filter">
+                      <div class="toy-price-range-labels">
+                        <span>Rs. {{ filter_range_min }}</span>
+                        <span>Rs. {{ filter_range_max }}+</span>
+                      </div>
+                      <div class="toy-price-inputs-row">
+                        <div class="toy-price-input-wrap">
+                          <span class="toy-price-prefix">Rs.</span>
+                          <input type="number" class="toy-price-input"
+                                 name="{{ filter.min_value.param_name }}"
+                                 value="{{ filter_min_value }}"
+                                 placeholder="Min"
+                                 min="{{ filter_range_min }}"
+                                 max="{{ filter_range_max }}"
+                                 step="1">
+                        </div>
+                        <span class="toy-price-dash">–</span>
+                        <div class="toy-price-input-wrap">
+                          <span class="toy-price-prefix">Rs.</span>
+                          <input type="number" class="toy-price-input"
+                                 name="{{ filter.max_value.param_name }}"
+                                 value="{{ filter_max_value }}"
+                                 placeholder="Max"
+                                 min="{{ filter_range_min }}"
+                                 max="{{ filter_range_max }}"
+                                 step="1">
+                        </div>
+                      </div>
+                      <button type="submit" class="toy-price-apply-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                        Apply Price
+                      </button>
+                      {%- if filter.min_value.value or filter.max_value.value -%}
+                        <a href="{{ filter.url_to_remove }}" class="toy-price-clear-btn">✕ Clear price</a>
+                      {%- endif -%}
+
+                      <!-- Quick budget links -->
+                      <div class="toy-price-quick" style="margin-top:14px;">
+                        <p class="toy-price-quick__label">Quick Budget</p>
+                        <div class="toy-price-quick__chips">
+                          <a href="/collections/toys-under-rs-500" class="toy-price-chip">Under Rs.500</a>
+                          <a href="/collections/toys-under-rs-1500" class="toy-price-chip">Under Rs.1500</a>
+                          <a href="/collections/toys-under-rs-5000" class="toy-price-chip">Under Rs.5000</a>
+                          <a href="/collections/toys-above-rs-5000" class="toy-price-chip">Above Rs.5000</a>
+                        </div>
+                      </div>
+                    </div>
+
+                {%- endcase -%}
+              </div>
+            </details>
+          </div>
+        {%- endfor -%}
+      </form>
+
+      <!-- Active filters clear all -->
+      {%- assign total_active = 0 -%}
+      {%- for filter in collection.filters -%}
+        {%- assign total_active = total_active | plus: filter.active_values.size -%}
+        {%- if filter.type == 'price_range' and filter.min_value.value or filter.type == 'price_range' and filter.max_value.value -%}
+          {%- assign total_active = total_active | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if total_active > 0 -%}
+        <div class="toy-fdrawer-section" style="padding-top:0;">
+          <a href="{{ collection.url }}" class="toy-fdrawer-clear-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            Clear all filters ({{ total_active }})
+          </a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+  </div><!-- /.toy-fdrawer__body -->
+</div><!-- /#ToyFilterDrawer -->
+
+<!-- Also keep the original FilterDrawer for theme JS compatibility -->
+<div id="FilterDrawer" class="drawer drawer--left" style="display:none!important;visibility:hidden;"></div>
+
+<style>
+/* ══ MOBILE FILTER DRAWER ═══════════════════════════════════ */
+.toy-fdrawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,25,54,0.45);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+.toy-fdrawer-overlay.is-open { opacity: 1; visibility: visible; }
+
+.toy-fdrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(340px, 92vw);
+  height: 100dvh;
+  background: #fff;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 4px 0 32px rgba(17,25,54,0.18);
+  border-radius: 0 20px 20px 0;
+  overflow: hidden;
+}
+.toy-fdrawer.is-open { transform: translateX(0); }
+
+/* Header */
+.toy-fdrawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid #ECECF3;
+  flex-shrink: 0;
+  background: #fff;
+}
+.toy-fdrawer__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111936;
+}
+.toy-fdrawer__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #111936;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.toy-fdrawer__close:hover { background: #fff0f6; color: #F72568; }
+
+/* Scrollable body */
+.toy-fdrawer__body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 32px;
+}
+
+/* Sections */
+.toy-fdrawer-section {
+  border-bottom: 1px solid rgba(17,25,54,0.07);
+  padding: 14px 18px;
+}
+.toy-fdrawer-section__title,
+.toy-fdrawer-section > .toy-fdrawer-acc > summary.toy-fdrawer-acc__trigger {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin-bottom: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.toy-fdrawer-section__title::-webkit-details-marker { display: none; }
+
+/* Nav links */
+.toy-fdrawer-nav { display: flex; flex-direction: column; gap: 0; }
+.toy-fdrawer-link {
+  display: block;
+  padding: 8px 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none !important;
+  transition: color 0.15s, padding-left 0.15s;
+  border-bottom: 1px solid rgba(17,25,54,0.04);
+}
+.toy-fdrawer-link:last-child { border-bottom: none; }
+.toy-fdrawer-link:hover { color: #F72568; padding-left: 6px; }
+.toy-fdrawer-link.is-active { color: #F72568; font-weight: 700; padding-left: 6px; }
+
+/* Accordion */
+.toy-fdrawer-acc { border-bottom: 1px solid rgba(17,25,54,0.05); }
+.toy-fdrawer-acc:last-child { border-bottom: none; }
+.toy-fdrawer-acc__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 4px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.toy-fdrawer-acc__trigger::-webkit-details-marker { display: none; }
+.toy-fdrawer-acc__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111936;
+  text-decoration: none !important;
+  flex: 1;
+}
+.toy-fdrawer-acc__title.is-active { color: #F72568; }
+.toy-fdrawer-acc__chevron { color: #9ca3af; transition: transform 0.2s; flex-shrink: 0; }
+.toy-fdrawer-acc[open] .toy-fdrawer-acc__chevron { transform: rotate(180deg); }
+
+.toy-fdrawer-children { padding: 4px 0 8px 14px !important; margin: 0 !important; }
+.toy-fdrawer-child {
+  display: block;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: #6b7280;
+  text-decoration: none !important;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.toy-fdrawer-child:hover { color: #F72568; border-left-color: #F72568; }
+.toy-fdrawer-child.is-active { color: #F72568; font-weight: 600; border-left-color: #F72568; }
+
+/* Filter checkboxes */
+.toy-fdrawer-checklist { margin: 4px 0; }
+.toy-fdrawer-checklist li { margin-bottom: 8px; }
+.toy-fdrawer-check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.toy-fdrawer-check-text { font-size: 13.5px; font-weight: 500; color: #374151; }
+.toy-fdrawer-filter-body { padding: 4px 0; }
+
+/* Clear all */
+.toy-fdrawer-clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #F72568;
+  text-decoration: none !important;
+  padding: 10px 14px;
+  background: #fff0f6;
+  border-radius: 10px;
+  border: 1.5px solid #fba4c0;
+  transition: background 0.15s;
+}
+.toy-fdrawer-clear-all:hover { background: #ffe0ec; }
+
+/* Body scroll lock */
+body.toy-filter-open { overflow: hidden !important; position: fixed; width: 100%; }
+
+/* Mobile filter bar buttons */
+@media (max-width: 768px) {
+  .collection-filter {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-bottom: 1px solid #ECECF3 !important;
+    box-shadow: 0 2px 8px rgba(17,25,54,0.05) !important;
+  }
+  .collection-filter__item--drawer { flex: 1; }
+  .collection-filter__item--sort   { flex: 1; }
+  .collection-filter__item--count  { display: none !important; }
+  .js-drawer-open-collection-filters,
+  #ToyFilterBtn {
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+  .collection-filter__sort-container select {
+    width: 100% !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+  }
+}
+/* ══ END MOBILE FILTER DRAWER ════════════════════════════════ */
+</style>
+
+<script>
+(function() {
+  /* ── Open / Close helpers ──────────────────────────────── */
+  var drawer  = document.getElementById('ToyFilterDrawer');
+  var overlay = document.getElementById('ToyFilterOverlay');
+  var closeBtn = document.getElementById('ToyFilterClose');
+
+  if (!drawer) return;
+
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('toy-filter-open');
+    /* Focus close button for a11y */
+    setTimeout(function() { if (closeBtn) closeBtn.focus(); }, 300);
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('toy-filter-open');
+  }
+
+  /* Close on overlay click */
+  if (overlay) overlay.addEventListener('click', closeDrawer);
+
+  /* Close button */
+  if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+
+  /* Escape key */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  /* ── Hook all filter-open triggers ────────────────────── */
+  function bindTriggers() {
+    /* Native theme button */
+    document.querySelectorAll('.js-drawer-open-collection-filters, [aria-controls="FilterDrawer"], #ToyFilterBtn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openDrawer();
+      });
+    });
+  }
+  bindTriggers();
+
+  /* Re-bind after AJAX (theme may re-render the section) */
+  document.addEventListener('shopify:section:load', bindTriggers);
+  document.addEventListener('toyFilterBind', bindTriggers);
+
+  /* ── Mobile filter form submit → close drawer ─────────── */
+  var mobileForm = document.getElementById('ToyMobileFilterForm');
+  if (mobileForm) {
+    /* For checkbox auto-submit, keep drawer open and let page reload */
+    /* For price apply button, just submit */
+    mobileForm.addEventListener('submit', function() {
+      closeDrawer();
+    });
+  }
+
+})();
+</script>
