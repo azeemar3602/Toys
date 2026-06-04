@@ -1,5 +1,8 @@
 {%- liquid
-  assign nav_menu = linklists['main-menu']
+  assign nav_menu = linklists['toylicious-main-menu']
+  if nav_menu == blank or nav_menu.links.size == 0
+    assign nav_menu = linklists['main-menu']
+  endif
   assign current_url = request.path
 -%}
 
@@ -158,8 +161,8 @@
                      data-max-name="{{ filter.max_value.param_name }}"
                      data-max="{{ filter_range_max }}">
                   <div class="price-range__display-wrapper">
-                    <span class="price-range__display-min">{{ filter_min_value }}</span>
-                    <span class="price-range__display-max">{{ filter_max_value }}</span>
+                    <span class="price-range__display-min">Rs.{{ filter_min_value }}</span>
+                    <span class="price-range__display-max">Rs.{{ filter_max_value }}</span>
                   </div>
                   <div class="price-range__slider-wrapper">
                     <div class="price-range__slider"></div>
@@ -170,6 +173,18 @@
                   <input class="price-range__input price-range__input-max"
                          name="{{ filter.max_value.param_name }}"
                          value="{{ filter_max_value }}" readonly>
+                </div>
+                <button type="submit" class="toy-price-apply-btn">Apply Price</button>
+
+                <!-- Quick budget collection links -->
+                <div class="toy-price-quick">
+                  <p class="toy-price-quick__label">Quick Budget</p>
+                  <div class="toy-price-quick__chips">
+                    <a href="/collections/toys-under-rs-500" class="toy-price-chip">Under Rs.500</a>
+                    <a href="/collections/toys-under-rs-1500" class="toy-price-chip">Under Rs.1500</a>
+                    <a href="/collections/toys-under-rs-5000" class="toy-price-chip">Under Rs.5000</a>
+                    <a href="/collections/toys-above-rs-5000" class="toy-price-chip">Above Rs.5000</a>
+                  </div>
                 </div>
             {%- endcase -%}
           </div>

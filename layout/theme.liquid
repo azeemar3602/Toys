@@ -748,6 +748,45 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   margin-bottom: 8px;
 }
 
+/* Price apply + quick chips */
+.toy-price-apply-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 0;
+  background: #111936;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toy-price-apply-btn:hover { background: #F72568; }
+.toy-price-quick { margin-top: 14px; }
+.toy-price-quick__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+.toy-price-quick__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.toy-price-chip {
+  display: inline-block;
+  padding: 5px 10px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.toy-price-chip:hover { background: #fff0f6; color: #F72568; border-color: #fba4c0; }
+
 /* ── Mobile sidebar drawer improvements ─────────────────── */
 @media (max-width: 768px) {
   .toy-sidebar-section { padding: 12px 14px; }

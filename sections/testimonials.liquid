@@ -1,227 +1,480 @@
-{%- style -%}
-  .testimonials-{{ section.id }} {
-    background-color: {{ section.settings.color_background }};
-    color: {{ section.settings.color_text }};
+{%- liquid
+  assign has_blocks = false
+  if section.blocks.size > 0
+    assign has_blocks = true
+  endif
+-%}
+
+<style>
+/* ══ PREMIUM REVIEWS SECTION ══════════════════════════════ */
+.toy-reviews {
+  background: var(--toy-cream, #FFFDF8);
+  padding: 60px 0 56px;
+  overflow: hidden;
+}
+.toy-reviews__heading {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+.toy-reviews__heading h2 {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  color: #111936;
+  margin: 0 0 10px;
+  line-height: 1.15;
+}
+.toy-reviews__heading p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+.toy-reviews__heading-accent {
+  display: block;
+  width: 56px;
+  height: 4px;
+  background: linear-gradient(90deg, #F72568, #7B4DE8);
+  border-radius: 99px;
+  margin: 14px auto 0;
+}
+
+/* Outer card */
+.toy-reviews__card {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+  background: transparent;
+}
+.toy-reviews__inner {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(17,25,54,0.07);
+  box-shadow: 0 8px 40px rgba(17,25,54,0.08);
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+}
+
+/* Summary panel */
+.toy-reviews__summary {
+  background: #FFFDF8;
+  border-radius: 18px;
+  border: 1px solid rgba(17,25,54,0.07);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+.toy-reviews__summary-star {
+  width: 56px;
+  height: 56px;
+  background: #FEF3C7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+.toy-reviews__summary-score {
+  font-size: 38px;
+  font-weight: 800;
+  color: #111936;
+  line-height: 1;
+}
+.toy-reviews__summary-stars {
+  color: #f59e0b;
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+.toy-reviews__summary-text {
+  font-size: 12.5px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.toy-reviews__summary-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: #fff0f6;
+  color: #F72568;
+  border: 1.5px solid #F72568;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: background 0.2s, color 0.2s;
+}
+.toy-reviews__summary-btn:hover { background: #F72568; color: #fff; }
+
+/* Reviews grid */
+.toy-reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  overflow: hidden;
+}
+
+/* Single review card */
+.toy-review-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(17,25,54,0.07);
+  box-shadow: 0 2px 10px rgba(17,25,54,0.05);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toy-review-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toy-review-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.toy-review-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111936;
+  line-height: 1.2;
+}
+.toy-review-card__city {
+  font-size: 11.5px;
+  color: #9ca3af;
+}
+.toy-review-card__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #EDFFF5;
+  color: #1FB56D;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid #b7f5d4;
+}
+.toy-review-card__stars {
+  color: #f59e0b;
+  font-size: 15px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.toy-review-card__text {
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.6;
+  flex: 1;
+}
+.toy-review-card__date {
+  font-size: 11px;
+  color: #d1d5db;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .toy-reviews__inner {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 20px;
+  }
+  .toy-reviews__summary {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    padding: 20px;
   }
 }
-{%- endstyle -%}
+@media (max-width: 640px) {
+  .toy-reviews__grid {
+    grid-template-columns: 1fr;
+    overflow-x: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+  .toy-review-card {
+    min-width: 260px;
+    flex-shrink: 0;
+  }
+  .toy-reviews { padding: 40px 0 36px; }
+}
+/* ══ END REVIEWS ══════════════════════════════════════════ */
+</style>
 
-<div
-  class="testimonials-section testimonials-{{ section.id }}{% if section.settings.color_background == settings.color_body_bg %} testimonials-section--with-divider{% endif %} text-{{ section.settings.align_text }}"
-  data-section-id="{{ section.id }}"
-  data-section-type="testimonials"
-  data-aos>
-  {%- if section.settings.title != blank -%}
-    <div class="page-width">
-      <div class="section-header">
-        <h2>{{ section.settings.title | escape }}</h2>
-      </div>
+<section class="toy-reviews" data-section-id="{{ section.id }}" data-section-type="testimonials">
+  <div class="page-width toy-reviews__card">
+
+    <!-- Heading -->
+    <div class="toy-reviews__heading">
+      <h2>{{ section.settings.title | default: 'Loved by Parents, Adored by Kids' }}</h2>
+      <p>{{ section.settings.subtitle | default: 'Real feedback from families shopping toys across Pakistan.' }}</p>
+      <span class="toy-reviews__heading-accent"></span>
     </div>
-  {%- endif -%}
 
-  {%- if section.blocks.size > 0 -%}
-    <div class="slideshow-wrapper">
-      <div
-        class="testimonials-slider"
-        id="Testimonials-{{ section.id }}"
-        data-dots="true"
-        data-count="{{ section.blocks.size }}">
-        {%- for block in section.blocks -%}
-          <div
-            class="testimonials-slide testimonials-slide--{{ block.id }}"
-            data-index="{{ forloop.index0 }}"
-            data-aos="row-of-{{ section.blocks.size }}"
-            {{ block.shopify_attributes }}>
-            <blockquote class="testimonials-slider__text">
-              {%- if block.settings.icon == 'quote' -%}
-                <span class="quote-icon"><svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-quote" viewBox="0 0 41 35"><path d="M10.208 17.711h6.124v16.332H0V21.684C0 8.184 5.444.956 16.332 0v6.125c-4.083 1.14-6.124 4.414-6.124 9.82v1.766zm24.498 0h6.124v16.332H24.498V21.684C24.498 8.184 29.942.956 40.83 0v6.125c-4.083 1.14-6.124 4.414-6.124 9.82v1.766z" fill="#000" fill-rule="evenodd"/></svg></span>
-              {%- elsif block.settings.icon == '5-stars' -%}
-                <span class="testimonial-stars">★★★★★</span>
-              {%- elsif block.settings.icon == '4-stars' -%}
-                <span class="testimonial-stars">★★★★</span>
-              {%- elsif block.settings.icon == '3-stars' -%}
-                <span class="testimonial-stars">★★★</span>
-              {%- elsif block.settings.icon == '2-stars' -%}
-                <span class="testimonial-stars">★★</span>
-              {%- elsif block.settings.icon == '1-star' -%}
-                <span class="testimonial-stars">★</span>
-              {%- endif -%}
+    <div class="toy-reviews__inner">
 
-              {%- if block.settings.testimonial != blank -%}
-                <div class="rte-setting text-spacing">{{ block.settings.testimonial }}</div>
-              {%- endif -%}
+      <!-- Summary panel -->
+      <div class="toy-reviews__summary">
+        <div class="toy-reviews__summary-star">⭐</div>
+        <div class="toy-reviews__summary-score">4.9<span style="font-size:20px;color:#9ca3af;">/5</span></div>
+        <div class="toy-reviews__summary-stars">★★★★★</div>
+        <p class="toy-reviews__summary-text">Based on happy customer reviews from parents across Pakistan.</p>
+        <a href="/collections/all" class="toy-reviews__summary-btn">Read all reviews</a>
+      </div>
 
-              {%- if block.settings.image != blank -%}
-                <div class="testimonail-image{% if section.settings.round_images %} testimonail-image--round{% endif %}">
-                  <div class="image-wrap text-spacing" style="height: 0; padding-bottom: {{ 100 | divided_by: block.settings.image.aspect_ratio }}%;">
-                    {%- assign img_url = block.settings.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
-                    <img class="lazyload"
-                        data-src="{{ img_url }}"
-                        data-widths="[180, 360, 540, 720]"
-                        data-aspectratio="{{ block.settings.image.aspect_ratio }}"
-                        data-sizes="auto"
-                        alt="{{ block.settings.image.alt }}">
-                    <noscript>
-                      <img class="lazyloaded" src="{{ block.settings.image | img_url: '400x' }}" alt="{{ block.settings.image.alt }}">
-                    </noscript>
-                  </div>
+      <!-- Review cards -->
+      <div class="toy-reviews__grid">
+        {%- if has_blocks -%}
+          {%- for block in section.blocks limit: 4 -%}
+            {%- liquid
+              assign initials = block.settings.author | slice: 0 | upcase
+              assign colors = '#F72568,#7B4DE8,#1FB56D,#3b82f6,#f59e0b,#ec4899' | split: ','
+              assign color_idx = forloop.index0 | modulo: 6
+              assign av_color = colors[color_idx]
+            -%}
+            <div class="toy-review-card" {{ block.shopify_attributes }}>
+              <div class="toy-review-card__top">
+                <div class="toy-review-card__avatar" style="background:{{ av_color }};">{{ initials }}</div>
+                <div>
+                  <div class="toy-review-card__name">{{ block.settings.author | escape }}</div>
+                  <div class="toy-review-card__city">{{ block.settings.author_info | escape }}</div>
                 </div>
+                <span class="toy-review-card__verified" style="margin-left:auto;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                  Verified
+                </span>
+              </div>
+              {%- assign icon = block.settings.icon | default: '5-stars' -%}
+              {%- if icon == '5-stars' -%}<div class="toy-review-card__stars">★★★★★</div>
+              {%- elsif icon == '4-stars' -%}<div class="toy-review-card__stars">★★★★<span style="color:#e5e7eb;">★</span></div>
+              {%- else -%}<div class="toy-review-card__stars">★★★★★</div>
               {%- endif -%}
+              {%- if block.settings.testimonial != blank -%}
+                <p class="toy-review-card__text">{{ block.settings.testimonial | strip_html }}</p>
+              {%- endif -%}
+              <div class="toy-review-card__date">{{ 'now' | date: '%B %Y' }}</div>
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          <!-- Static fallback reviews -->
+          {%- assign fallback_reviews = 'Fatima S.|Lahore|Excellent quality and fast delivery. My nephew loved the learning toy!|#F72568|F,Ayesha K.|Karachi|Packing bohat achi thi aur product bilkul website jaisa tha.|#7B4DE8|A,Usman R.|Islamabad|Great toy collection for kids. Prices are reasonable and support was quick.|#1FB56D|U,Sana M.|Multan|Best store in Pakistan for kids gifts. Will order again soon.|#3b82f6|S' | split: ',' -%}
+          {%- assign fallback_data = '' -%}
 
-              {%- if block.settings.author != blank -%}
-                <cite>{{ block.settings.author | escape }}</cite>
-              {%- endif -%}
-              {%- if block.settings.author_info != blank -%}
-                <div class="testimonials__info">{{ block.settings.author_info | escape }}</div>
-              {%- endif -%}
-            </blockquote>
+          <div class="toy-review-card">
+            <div class="toy-review-card__top">
+              <div class="toy-review-card__avatar" style="background:#F72568;">F</div>
+              <div>
+                <div class="toy-review-card__name">Fatima S.</div>
+                <div class="toy-review-card__city">Lahore</div>
+              </div>
+              <span class="toy-review-card__verified" style="margin-left:auto;"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>Verified</span>
+            </div>
+            <div class="toy-review-card__stars">★★★★★</div>
+            <p class="toy-review-card__text">Excellent quality and fast delivery. My nephew loved the learning toy!</p>
+            <div class="toy-review-card__date">2 days ago</div>
           </div>
-        {%- endfor -%}
+
+          <div class="toy-review-card">
+            <div class="toy-review-card__top">
+              <div class="toy-review-card__avatar" style="background:#7B4DE8;">A</div>
+              <div>
+                <div class="toy-review-card__name">Ayesha K.</div>
+                <div class="toy-review-card__city">Karachi</div>
+              </div>
+              <span class="toy-review-card__verified" style="margin-left:auto;"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>Verified</span>
+            </div>
+            <div class="toy-review-card__stars">★★★★★</div>
+            <p class="toy-review-card__text">Packing bohat achi thi aur product bilkul website jaisa tha.</p>
+            <div class="toy-review-card__date">1 week ago</div>
+          </div>
+
+          <div class="toy-review-card">
+            <div class="toy-review-card__top">
+              <div class="toy-review-card__avatar" style="background:#1FB56D;">U</div>
+              <div>
+                <div class="toy-review-card__name">Usman R.</div>
+                <div class="toy-review-card__city">Islamabad</div>
+              </div>
+              <span class="toy-review-card__verified" style="margin-left:auto;"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>Verified</span>
+            </div>
+            <div class="toy-review-card__stars">★★★★★</div>
+            <p class="toy-review-card__text">Great toy collection for kids. Prices are reasonable and support was quick.</p>
+            <div class="toy-review-card__date">2 weeks ago</div>
+          </div>
+
+          <div class="toy-review-card">
+            <div class="toy-review-card__top">
+              <div class="toy-review-card__avatar" style="background:#3b82f6;">S</div>
+              <div>
+                <div class="toy-review-card__name">Sana M.</div>
+                <div class="toy-review-card__city">Multan</div>
+              </div>
+              <span class="toy-review-card__verified" style="margin-left:auto;"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>Verified</span>
+            </div>
+            <div class="toy-review-card__stars">★★★★★</div>
+            <p class="toy-review-card__text">Best store in Pakistan for kids gifts. Will order again soon.</p>
+            <div class="toy-review-card__date">3 weeks ago</div>
+          </div>
+        {%- endif -%}
       </div>
+
     </div>
-  {%- endif -%}
-</div>
+  </div>
+</section>
 
 {% schema %}
-  {
-    "name": "Testimonials",
-    "class": "index-section",
-    "max_blocks": 9,
-    "settings": [
-      {
-        "type": "text",
-        "id": "title",
-        "label": "Heading",
-        "default": "Testimonials"
-      },
-      {
-        "type": "select",
-        "id": "align_text",
-        "label": "Text alignment",
-        "default": "center",
-        "options": [
-          {
-            "value": "left",
-            "label": "Left"
-          },
-          {
-            "value": "center",
-            "label": "Centered"
-          },
-          {
-            "value": "right",
-            "label": "Right"
+{
+  "name": "Customer Reviews",
+  "class": "index-section",
+  "max_blocks": 9,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Loved by Parents, Adored by Kids"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Real feedback from families shopping toys across Pakistan."
+    },
+    {
+      "type": "select",
+      "id": "align_text",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "round_images",
+      "label": "Round author images",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "color_background",
+      "label": "Background color",
+      "default": "#FFFDF8"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text color",
+      "default": "#111936"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Rating",
+          "default": "5-stars",
+          "options": [
+            { "value": "5-stars", "label": "★★★★★" },
+            { "value": "4-stars", "label": "★★★★" },
+            { "value": "3-stars", "label": "★★★" },
+            { "value": "quote", "label": "Quote" }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "testimonial",
+          "label": "Review text",
+          "default": "<p>Great product!</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Author photo"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Customer name",
+          "default": "Happy Customer"
+        },
+        {
+          "type": "text",
+          "id": "author_info",
+          "label": "City / Info",
+          "default": "Pakistan"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Reviews",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "icon": "5-stars",
+            "testimonial": "<p>Excellent quality and fast delivery. My nephew loved the learning toy!</p>",
+            "author": "Fatima S.",
+            "author_info": "Lahore"
           }
-        ]
-      },
-      {
-        "type": "checkbox",
-        "id": "round_images",
-        "label": "Circular images",
-        "info": "Requires square images",
-        "default": true
-      },
-      {
-        "type": "color",
-        "id": "color_background",
-        "label": "Background",
-        "default": "#f9f9f9"
-      },
-      {
-        "type": "color",
-        "id": "color_text",
-        "label": "Text",
-        "default": "#1c1d1d"
-      }
-    ],
-    "blocks": [
-      {
-        "type": "testimonial",
-        "name": "Testimonial",
-        "settings": [
-          {
-            "type": "select",
-            "id": "icon",
-            "label": "Icon",
-            "default": "5-stars",
-            "options": [
-              {
-                "value": "none",
-                "label": "None"
-              },
-              {
-                "value": "quote",
-                "label": "Quote"
-              },
-              {
-                "value": "5-stars",
-                "label": "5 stars"
-              },
-              {
-                "value": "4-stars",
-                "label": "4 stars"
-              },
-              {
-                "value": "3-stars",
-                "label": "3 stars"
-              },
-              {
-                "value": "2-stars",
-                "label": "2 stars"
-              },
-              {
-                "value": "1-star",
-                "label": "1 star"
-              }
-            ]
-          },
-          {
-            "type": "richtext",
-            "id": "testimonial",
-            "label": "Text",
-            "default": "<p>Add customer reviews and testimonials to showcase your store’s happy customers.</p>"
-          },
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "Author's image"
-          },
-          {
-            "type": "text",
-            "id": "author",
-            "label": "Author",
-            "default": "Author's name"
-          },
-          {
-            "type": "text",
-            "id": "author_info",
-            "label": "Author info",
-            "default": "Los Angeles, CA"
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "icon": "5-stars",
+            "testimonial": "<p>Packing bohat achi thi aur product bilkul website jaisa tha.</p>",
+            "author": "Ayesha K.",
+            "author_info": "Karachi"
           }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Testimonials",
-        "blocks": [
-          {
-            "type": "testimonial"
-          },
-          {
-            "type": "testimonial"
-          },
-          {
-            "type": "testimonial"
-          },
-          {
-            "type": "testimonial"
-          },
-          {
-            "type": "testimonial"
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "icon": "5-stars",
+            "testimonial": "<p>Great toy collection for kids. Prices are reasonable and support was quick.</p>",
+            "author": "Usman R.",
+            "author_info": "Islamabad"
           }
-        ]
-      }
-    ]
-  }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "icon": "5-stars",
+            "testimonial": "<p>Best store in Pakistan for kids gifts. Will order again soon.</p>",
+            "author": "Sana M.",
+            "author_info": "Multan"
+          }
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}
