@@ -171,8 +171,14 @@
     var compareAt = variant ? variant.compare_at_price : null;
     var onSale    = compareAt && compareAt > price;
     var savePct   = onSale ? Math.round((compareAt - price) / compareAt * 100) : 0;
-    var rawImg    = (p.images && p.images[0]) ? p.images[0].src : '';
-    /* Resize Shopify CDN image: strip query params, insert _480x before extension */
+    /* p.images is array of URL strings in /products/handle.js */
+    var rawImg = '';
+    if (p.images && p.images.length) {
+      rawImg = typeof p.images[0] === 'string' ? p.images[0] : (p.images[0].src || '');
+    }
+    if (!rawImg && p.featured_image) {
+      rawImg = typeof p.featured_image === 'string' ? p.featured_image : (p.featured_image.src || '');
+    }
     var imgSrc = rawImg
       ? rawImg.split('?')[0].replace(/(\.[a-z]+)$/i, '_480x$1')
       : '';
