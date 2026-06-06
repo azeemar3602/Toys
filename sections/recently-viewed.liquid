@@ -171,7 +171,11 @@
     var compareAt = variant ? variant.compare_at_price : null;
     var onSale    = compareAt && compareAt > price;
     var savePct   = onSale ? Math.round((compareAt - price) / compareAt * 100) : 0;
-    var imgSrc    = (p.images && p.images[0]) ? p.images[0].src : '';
+    var rawImg    = (p.images && p.images[0]) ? p.images[0].src : '';
+    /* Resize Shopify CDN image: strip query params, insert _480x before extension */
+    var imgSrc = rawImg
+      ? rawImg.split('?')[0].replace(/(\.[a-z]+)$/i, '_480x$1')
+      : '';
     var url       = '/products/' + p.handle;
 
     var badge = onSale
