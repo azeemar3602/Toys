@@ -1,27 +1,19 @@
 {%- liquid
   assign grid_item_width = 'small--one-half medium-up--one-quarter'
-  assign row_of = 4
-
   case section.settings.recent_count
     when 2
       assign grid_item_width = 'medium-up--one-half'
-      assign row_of = 2
     when 3
       assign grid_item_width = 'small--one-half medium-up--one-third'
-      assign row_of = 3
     when 4
       assign grid_item_width = 'small--one-half medium-up--one-quarter'
-      assign row_of = 4
     when 6
       assign grid_item_width = 'small--one-half medium-up--one-third'
-      assign row_of = 3
     when 8
       assign grid_item_width = 'small--one-half medium-up--one-quarter'
-      assign row_of = 4
   endcase
 -%}
 
-<!-- Recently Viewed — hidden until JS confirms products exist -->
 <div
   id="RecentlyViewedSection-{{ section.id }}"
   class="toy-rv-section index-section"
@@ -29,8 +21,6 @@
   data-section-type="recently-viewed"
   data-product-handle="{{ product.handle }}"
   data-recent-count="{{ section.settings.recent_count }}"
-  data-grid-item-class="{{ grid_item_width }}"
-  data-row-of="{{ row_of }}"
   style="display:none;">
 
   <hr class="hr--large">
@@ -44,14 +34,100 @@
 
 <style>
 .toy-rv-section { background: var(--toy-cream, #FFFDF8); }
-.toy-rv-grid {
-  gap: 20px 0;
-  margin-bottom: 40px;
-}
+.toy-rv-grid { gap: 20px 0; margin-bottom: 40px; }
 .toy-rv-grid .grid__item { padding: 0 10px; }
 @media (max-width: 749px) {
   .toy-rv-grid { gap: 12px 0; }
   .toy-rv-grid .grid__item { padding: 0 5px; }
+}
+
+/* Inline product card for recently viewed */
+.toy-rv-card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 2px 14px rgba(15,23,42,0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.25s, transform 0.25s;
+  height: auto;
+}
+.toy-rv-card:hover { box-shadow: 0 10px 32px rgba(15,23,42,0.13); transform: translateY(-3px); }
+.toy-rv-media {
+  display: block;
+  position: relative;
+  background: #fff;
+  padding: 18px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-decoration: none !important;
+}
+.toy-rv-media img {
+  max-width: 78%;
+  max-height: 190px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+.toy-rv-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: #ec1f65;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  z-index: 2;
+}
+.toy-rv-body { padding: 12px 14px 14px; display: flex; flex-direction: column; }
+.toy-rv-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111936;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+  text-decoration: none !important;
+  display: block;
+}
+.toy-rv-price {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.toy-rv-price-current { font-size: 16px; font-weight: 800; color: #111936; }
+.toy-rv-price-compare { font-size: 12px; color: #adb5bd; text-decoration: line-through; }
+.toy-rv-atc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 10px;
+  background: #111936;
+  color: #fff !important;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: background 0.2s;
+}
+.toy-rv-atc:hover { background: #F72568; color: #fff !important; }
+@media (max-width: 749px) {
+  .toy-rv-media { min-height: 150px; padding: 14px; }
+  .toy-rv-media img { max-height: 150px; }
+  .toy-rv-title { font-size: 12.5px; }
+  .toy-rv-price-current { font-size: 14px; }
 }
 </style>
 
@@ -67,14 +143,12 @@
 
   if (!sectionEl || !gridEl) return;
 
-  /* ── 1. Save current product to localStorage ─────────── */
+  /* ── 1. Save current handle ─────────────────────────────── */
   function getViewed() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch(e) { return []; }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; }
   }
   function saveViewed(arr) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-    catch(e) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch(e) {}
   }
 
   var viewed = getViewed().filter(function(h) { return h !== currentHandle; });
@@ -82,59 +156,88 @@
   if (viewed.length > MAX_ITEMS) viewed = viewed.slice(0, MAX_ITEMS);
   saveViewed(viewed);
 
-  /* ── 2. Get handles to display (exclude current) ──────── */
+  /* ── 2. Get handles to display ──────────────────────────── */
   var toShow = viewed.filter(function(h) { return h !== currentHandle; }).slice(0, limit);
-  if (toShow.length === 0) { sectionEl.style.display = 'none'; return; }
+  if (!toShow.length) return;
 
-  /* ── 3. Fetch product cards one by one ────────────────── */
+  /* ── 3. Fetch product data via JSON API ─────────────────── */
+  function formatMoney(cents) {
+    return 'Rs.' + (cents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function buildCard(p) {
+    var variant   = p.variants && p.variants[0];
+    var price     = variant ? variant.price : p.price;
+    var compareAt = variant ? variant.compare_at_price : null;
+    var onSale    = compareAt && compareAt > price;
+    var savePct   = onSale ? Math.round((compareAt - price) / compareAt * 100) : 0;
+    var imgSrc    = (p.images && p.images[0]) ? p.images[0].src : '';
+    var url       = '/products/' + p.handle;
+
+    var badge = onSale
+      ? '<span class="toy-rv-badge">SAVE ' + savePct + '%</span>'
+      : '';
+
+    var img = imgSrc
+      ? '<img src="' + imgSrc.replace(/(\.[^.]+)$/, '_480x$1') + '" alt="' + (p.title || '').replace(/"/g, '&quot;') + '" loading="lazy">'
+      : '';
+
+    var compareHtml = onSale
+      ? '<span class="toy-rv-price-compare">' + formatMoney(compareAt) + '</span>'
+      : '';
+
+    var atcHref = p.variants && p.variants.length > 1 ? url : url;
+
+    return '<div class="grid__item grid-product ' + gridClass + '">'
+      + '<div class="toy-rv-card">'
+        + '<a href="' + url + '" class="toy-rv-media">'
+          + badge
+          + img
+        + '</a>'
+        + '<div class="toy-rv-body">'
+          + '<a href="' + url + '" class="toy-rv-title">' + (p.title || '') + '</a>'
+          + '<div class="toy-rv-price">'
+            + '<span class="toy-rv-price-current">' + formatMoney(price) + '</span>'
+            + compareHtml
+          + '</div>'
+          + '<a href="' + url + '" class="toy-rv-atc">'
+            + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path stroke-linecap="round" d="M16 10a4 4 0 0 1-8 0"/></svg>'
+            + (p.variants && p.variants.length > 1 ? 'View Options' : 'Add to Cart')
+          + '</a>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ── 4. Load products and render ────────────────────────── */
   var loaded = 0;
-  var fragment = document.createDocumentFragment();
-  var errors   = 0;
+  var html   = new Array(toShow.length);
+  var errors = 0;
 
   toShow.forEach(function(handle, i) {
-    fetch('/products/' + handle + '?view=card-snippet', { method: 'GET' })
+    fetch('/products/' + handle + '.js')
       .then(function(r) {
-        if (!r.ok) throw new Error('404');
-        return r.text();
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
       })
-      .then(function(html) {
-        var tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        var card = tmp.querySelector('.grid__item, .tpc-card, .grid-product');
-        if (card) {
-          /* Wrap in grid item if it isn't already */
-          if (!card.classList.contains('grid__item')) {
-            var wrap = document.createElement('div');
-            wrap.className = 'grid__item grid-product ' + gridClass;
-            wrap.appendChild(card);
-            fragment.appendChild(wrap);
-          } else {
-            card.classList.add(gridClass.split(' ')[0], gridClass.split(' ')[1] || '');
-            fragment.appendChild(card);
-          }
-        }
+      .then(function(product) {
+        html[i] = buildCard(product);
       })
-      .catch(function() { errors++; })
+      .catch(function() {
+        html[i] = '';
+        errors++;
+      })
       .finally(function() {
         loaded++;
         if (loaded === toShow.length) {
-          gridEl.appendChild(fragment);
-          if (gridEl.children.length > 0) {
+          var combined = html.join('');
+          if (combined.trim()) {
+            gridEl.innerHTML = combined;
             sectionEl.style.display = '';
           }
         }
       });
   });
-
-  /* Fallback: use native recently-viewed if theme JS populated it */
-  setTimeout(function() {
-    /* If our fetch failed entirely, try native grid */
-    var native = document.getElementById('RecentlyViewed-{{ section.id }}');
-    if (native && native.children.length > 0 && gridEl.children.length === 0) {
-      while (native.firstChild) gridEl.appendChild(native.firstChild);
-      sectionEl.style.display = '';
-    }
-  }, 2500);
 
 })();
 </script>
