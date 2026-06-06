@@ -172,16 +172,13 @@
     var onSale    = compareAt && compareAt > price;
     var savePct   = onSale ? Math.round((compareAt - price) / compareAt * 100) : 0;
     /* p.images is array of URL strings in /products/handle.js */
-    var rawImg = '';
+    var imgSrc = '';
     if (p.images && p.images.length) {
-      rawImg = typeof p.images[0] === 'string' ? p.images[0] : (p.images[0].src || '');
+      imgSrc = typeof p.images[0] === 'string' ? p.images[0] : (p.images[0].src || '');
     }
-    if (!rawImg && p.featured_image) {
-      rawImg = typeof p.featured_image === 'string' ? p.featured_image : (p.featured_image.src || '');
+    if (!imgSrc && p.featured_image) {
+      imgSrc = typeof p.featured_image === 'string' ? p.featured_image : (p.featured_image.src || '');
     }
-    var imgSrc = rawImg
-      ? rawImg.split('?')[0].replace(/(\.[a-z]+)$/i, '_480x$1')
-      : '';
     var url       = '/products/' + p.handle;
 
     var badge = onSale
