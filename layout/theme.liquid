@@ -655,9 +655,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
 @media (min-width: 769px) {
   .site-footer .collapsible-content { height: auto !important; overflow: visible !important; }
 }
+/* Footer mobile — JS handles open/close; CSS provides base states */
 @media (max-width: 768px) {
-  .site-footer .collapsible-content { overflow: hidden; transition: height 0.3s; height: 0; }
-  .site-footer .collapsible-content.is-open { height: auto; }
+  .site-footer .collapsible-content--small { height: 0; overflow: hidden; }
 }
 
 /* Footer links list */

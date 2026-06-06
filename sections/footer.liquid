@@ -113,6 +113,157 @@
   </div>
 </footer>
 
+<style>
+/* ══ MOBILE FOOTER ACCORDION ═══════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Collapsible content — hidden by default on mobile */
+  .site-footer .collapsible-content--small {
+    height: 0 !important;
+    overflow: hidden !important;
+    transition: height 0.28s cubic-bezier(0.4,0,0.2,1) !important;
+  }
+  .site-footer .collapsible-content--small.is-open {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Mobile accordion trigger button */
+  .site-footer .collapsible-trigger-btn {
+    display: flex !important;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.10) !important;
+    cursor: pointer;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    text-align: left;
+    min-height: 58px;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .site-footer .collapsible-trigger-btn:first-child {
+    border-top: 1px solid rgba(255,255,255,0.10);
+  }
+
+  /* Chevron icon */
+  .site-footer .collapsible-trigger__icon,
+  .site-footer .collapsible-trigger-btn .icon {
+    color: rgba(255,255,255,0.5) !important;
+    flex-shrink: 0;
+    transition: transform 0.25s;
+    width: 14px;
+    height: 14px;
+  }
+  .site-footer .collapsible-trigger-btn.is-open .collapsible-trigger__icon,
+  .site-footer .collapsible-trigger-btn.is-open .icon {
+    transform: rotate(180deg);
+    color: #F72568 !important;
+  }
+  .site-footer .collapsible-trigger-btn.is-open { color: #F72568 !important; border-bottom-color: rgba(247,37,104,0.25) !important; }
+
+  /* Content inner padding */
+  .site-footer .collapsible-content__inner {
+    padding: 12px 20px 20px !important;
+  }
+  .site-footer .site-footer__linklist li { margin-bottom: 10px; }
+  .site-footer .site-footer__linklist a {
+    font-size: 14px !important;
+    color: rgba(255,255,255,0.75) !important;
+    padding: 4px 0;
+    display: block;
+  }
+
+  /* Desktop title hidden on mobile */
+  .site-footer .footer__title.small--hide { display: none !important; }
+
+  /* Newsletter input on mobile */
+  .site-footer .newsletter-form__input { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+  .site-footer .newsletter-form__submit { background: #F72568 !important; }
+}
+/* ══ END MOBILE FOOTER ACCORDION ════════════════════════════ */
+</style>
+
+<script>
+/* ── Footer mobile accordion JS ─────────────────────────── */
+(function() {
+  function initFooterAccordion() {
+    /* Target only mobile footer toggle buttons */
+    var footerBtns = document.querySelectorAll(
+      '.site-footer .collapsible-trigger-btn, .site-footer [data-collapsible-id]'
+    );
+
+    footerBtns.forEach(function(btn) {
+      if (btn.dataset.footerInit) return;
+      btn.dataset.footerInit = '1';
+
+      btn.addEventListener('click', function(e) {
+        /* Only run on mobile */
+        if (window.innerWidth >= 769) return;
+
+        var targetId = btn.getAttribute('aria-controls');
+        var content  = targetId ? document.getElementById(targetId) : null;
+
+        /* Fallback: find next sibling collapsible-content */
+        if (!content) {
+          var next = btn.nextElementSibling;
+          while (next && !next.classList.contains('collapsible-content')) {
+            next = next.nextElementSibling;
+          }
+          content = next;
+        }
+        if (!content) return;
+
+        var isOpen = content.classList.contains('is-open');
+
+        if (isOpen) {
+          /* Close */
+          content.style.height = content.scrollHeight + 'px';
+          requestAnimationFrame(function() {
+            content.style.height = '0px';
+          });
+          content.addEventListener('transitionend', function once() {
+            content.removeEventListener('transitionend', once);
+            content.classList.remove('is-open');
+            content.style.height = '';
+          });
+          btn.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          /* Open */
+          content.classList.add('is-open');
+          content.style.height = '0px';
+          requestAnimationFrame(function() {
+            content.style.height = content.scrollHeight + 'px';
+          });
+          content.addEventListener('transitionend', function once() {
+            content.removeEventListener('transitionend', once);
+            if (content.classList.contains('is-open')) {
+              content.style.height = 'auto';
+            }
+          });
+          btn.classList.add('is-open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFooterAccordion);
+  } else {
+    initFooterAccordion();
+  }
+})();
+</script>
+
 {% schema %}
   {
     "name": "Footer",
