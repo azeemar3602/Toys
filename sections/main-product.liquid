@@ -195,6 +195,44 @@ input[data-variant-input]:checked + .variant__button-label {
 
 
 <script>
+/* ══ Quantity +/- Button Fix ════════════════════════════════
+   Uses capture-phase delegation so it fires BEFORE the theme's
+   button-level click handlers, preventing any double-increment.
+   Scoped to [data-section-type="product"] only — cart unaffected.
+════════════════════════════════════════════════════════════ */
+(function() {
+  document.addEventListener('click', function(e) {
+    /* Walk up from click target to find a qty adjust button */
+    var btn = e.target.closest('.js-qty__adjust');
+    if (!btn) return;
+
+    /* Only intercept product-page qty — not cart drawer */
+    var productSection = btn.closest('[data-section-type="product"]');
+    if (!productSection) return;
+
+    /* Stop the theme's own bubble-phase handler from also firing */
+    e.stopImmediatePropagation();
+
+    var wrapper = btn.closest('.js-qty__wrapper');
+    var input   = wrapper && wrapper.querySelector('.js-qty__num');
+    if (!input) return;
+
+    var current = parseInt(input.value, 10) || 1;
+    var min     = parseInt(input.getAttribute('min'), 10) || 1;
+
+    if (btn.classList.contains('js-qty__adjust--plus')) {
+      input.value = current + 1;
+    } else {
+      input.value = Math.max(min, current - 1);
+    }
+
+    /* Notify any listeners watching the input (e.g. custom analytics) */
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, true /* capture phase */);
+})();
+</script>
+
+<script>
 /* ── Product tab/description toggle fallback ─────────────── */
 (function() {
   function initToggles() {
