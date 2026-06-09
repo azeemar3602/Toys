@@ -94,14 +94,14 @@
         </div>
       </label>
 
-      {%- comment -%} ── Default: Buy 3 at 18% off ──────────────── {%- endcomment -%}
+      {%- comment -%} ── Default: Buy 3+ at 18% off ─────────────── {%- endcomment -%}
       {%- assign buy3_total    = current_price | times: 3 | times: 82 | divided_by: 100 -%}
       {%- assign buy3_original = current_price | times: 3 -%}
-      <label class="toy-bundle-card" data-qty="3" data-discount="18">
+      <label class="toy-bundle-card" data-qty="3" data-qty-min="true" data-discount="18">
         <input type="radio" name="toy_bundle_{{ section.id }}" value="3"
-               class="toy-bundle-radio" aria-label="Buy 3">
+               class="toy-bundle-radio" aria-label="Buy 3 or more">
         <div class="toy-bundle-card-body">
-          <div class="toy-bundle-qty-label">Buy 3</div>
+          <div class="toy-bundle-qty-label">Buy 3+</div>
           <div class="toy-bundle-discount-label">18% OFF</div>
         </div>
         <div class="toy-bundle-price-col">
