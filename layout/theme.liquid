@@ -1182,5 +1182,63 @@ input:focus,textarea:focus,select:focus{border-color:var(--toy-pink)!important;b
   -%}
 
 
+<script>
+/* ══ Universal Quantity +/- Button Fix ═════════════════════
+   Fallback for theme.QtySelector — works on product page,
+   cart page, and cart drawer. Uses bubble-phase delegation
+   on document so it catches all dynamically-rendered qty
+   wrappers. Only fires if the input value didn't already
+   change (meaning the theme's own handler didn't run).
+
+   For cart items: dispatches the 'cart:quantity' custom
+   event that theme.CartForm.quantityChanged expects.
+════════════════════════════════════════════════════════════ */
+(function() {
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.js-qty__adjust');
+    if (!btn) return;
+
+    var wrapper = btn.closest('.js-qty__wrapper');
+    var input   = wrapper && wrapper.querySelector('.js-qty__num');
+    if (!input) return;
+
+    var before  = parseInt(input.value, 10) || 1;
+    var min     = parseInt(input.getAttribute('min'), 10) || 0;
+
+    /* Wait a tick — if theme.QtySelector is working, it'll
+       have already changed the value. We only act if it didn't. */
+    setTimeout(function() {
+      var after = parseInt(input.value, 10) || 1;
+      if (after !== before) return; /* Theme handler worked — bail */
+
+      var newQty;
+      if (btn.classList.contains('js-qty__adjust--plus')) {
+        newQty = before + 1;
+      } else {
+        newQty = Math.max(min, before - 1);
+      }
+      input.value = newQty;
+
+      /* Fire change event so product-page / bundle JS reacts */
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+
+      /* ── Cart-specific: dispatch cart:quantity event ──────── */
+      var cartForm = wrapper.closest('#CartPageForm, [data-location="drawer"]');
+      if (cartForm) {
+        var key = input.dataset.id || input.getAttribute('data-id');
+        if (key) {
+          /* Try both namespaces the theme uses */
+          ['.cart-page', '.cart-drawer', ''].forEach(function(ns) {
+            document.dispatchEvent(new CustomEvent('cart:quantity' + ns, {
+              detail: [key, newQty, wrapper]
+            }));
+          });
+        }
+      }
+    }, 30);
+  });
+})();
+</script>
+
 </body>
 </html>
