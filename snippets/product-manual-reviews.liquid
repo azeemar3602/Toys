@@ -1,0 +1,213 @@
+{%- liquid
+  comment
+    ── Review Sources (priority order) ──────────────────────
+    1. custom.product_reviews  → List of product_review metaobject refs
+    2. custom.manual_reviews   → JSON array fallback
+    ── Review Counts / Avg ──────────────────────────────────
+    custom.review_average → Decimal  (e.g. 4.9)
+    custom.review_count   → Integer  (e.g. 78)
+  endcomment
+
+  assign mo_reviews   = product.metafields.custom.product_reviews.value
+  assign json_reviews = product.metafields.custom.manual_reviews.value
+  assign avg_meta     = product.metafields.custom.review_average.value
+  assign cnt_meta     = product.metafields.custom.review_count.value
+
+  assign review_source = 'none'
+  if mo_reviews != blank and mo_reviews.size > 0
+    assign review_source = 'metaobj'
+  elsif json_reviews != blank and json_reviews.size > 0
+    assign review_source = 'json'
+  endif
+
+  assign has_reviews = false
+  if review_source != 'none'
+    assign has_reviews = true
+  endif
+
+  comment
+    Build display average and count
+    Priority: explicit metafields → calculated from data
+  endcomment
+  assign display_avg = ''
+  assign display_cnt = 0
+
+  if cnt_meta != blank and cnt_meta != 0
+    assign display_cnt = cnt_meta | plus: 0
+    assign display_avg = avg_meta | plus: 0.0 | round: 1
+  elsif review_source == 'json' and json_reviews != blank
+    assign display_cnt = json_reviews.size
+    assign display_avg = 5.0
+  elsif review_source == 'metaobj' and mo_reviews != blank
+    assign display_cnt = mo_reviews.size
+    assign display_avg = 5.0
+  endif
+-%}
+
+{%- if has_reviews -%}
+
+  {%- assign avg_floor = display_avg | floor -%}
+
+<div class="toy-reviews-section" id="ToyReviewsSection">
+  <div class="page-width">
+
+    <!-- Section header -->
+    <div class="toy-reviews-top">
+      <div class="toy-reviews-header-left">
+        <h2 class="toy-reviews-section-title">Customer Reviews</h2>
+        {%- if display_cnt > 0 -%}
+          <div class="toy-reviews-summary-row">
+            <div class="toy-reviews-big-avg">{{ display_avg }}</div>
+            <div class="toy-reviews-summary-right">
+              <span class="toy-reviews-summary-stars" aria-hidden="true">
+                {%- for i in (1..5) -%}
+                  {%- if i <= avg_floor -%}★{%- else -%}☆{%- endif -%}
+                {%- endfor -%}
+              </span>
+              <span class="toy-reviews-summary-count">Based on {{ display_cnt }} reviews</span>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div><!-- /toy-reviews-top -->
+
+    <!-- Review cards grid -->
+    <div class="toy-review-grid">
+
+      {%- if review_source == 'metaobj' -%}
+
+        {%- assign display_idx = 0 -%}
+        {%- for review in mo_reviews -%}
+          {%- assign show_it = review.show_review.value -%}
+          {%- if show_it == blank -%}{%- assign show_it = true -%}{%- endif -%}
+
+          {%- if show_it -%}
+            {%- assign display_idx = display_idx | plus: 1 -%}
+            {%- assign r_name     = review.reviewer_name.value -%}
+            {%- assign r_rating   = review.rating.value | plus: 0 -%}
+            {%- assign r_title    = review.review_title.value -%}
+            {%- assign r_body     = review.review_body.value -%}
+            {%- assign r_date     = review.review_date.value -%}
+            {%- assign r_verified = review.verified_buyer.value -%}
+            {%- assign r_location = review.location.value -%}
+            {%- if display_idx > 8 -%}
+              {%- assign card_class = 'toy-review-card toy-review-hidden' -%}
+            {%- else -%}
+              {%- assign card_class = 'toy-review-card' -%}
+            {%- endif -%}
+
+            <div class="{{ card_class }}">
+              <span class="toy-review-stars" aria-label="{{ r_rating }} out of 5 stars">
+                {%- for i in (1..5) -%}
+                  {%- if i <= r_rating -%}★{%- else -%}☆{%- endif -%}
+                {%- endfor -%}
+              </span>
+              {%- if r_title != blank -%}
+                <div class="toy-review-title">{{ r_title | escape }}</div>
+              {%- endif -%}
+              <p class="toy-review-body">{{ r_body | escape | newline_to_br }}</p>
+              <div class="toy-review-meta">
+                <span class="toy-review-name">{{ r_name | escape }}</span>
+                {%- if r_verified -%}
+                  <span class="toy-review-verified">✓ Verified Buyer</span>
+                {%- endif -%}
+                {%- if r_location != blank -%}
+                  <span class="toy-review-separator">·</span>
+                  <span>{{ r_location | escape }}</span>
+                {%- endif -%}
+                {%- if r_date != blank -%}
+                  <span class="toy-review-separator">·</span>
+                  <span class="toy-review-date">{{ r_date | date: "%b %d, %Y" }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+
+          {%- endif -%}
+        {%- endfor -%}
+
+      {%- elsif review_source == 'json' -%}
+
+        {%- for review in json_reviews -%}
+          {%- assign r_rating   = review.rating | plus: 0 -%}
+          {%- assign r_name     = review.name -%}
+          {%- assign r_title    = review.title -%}
+          {%- assign r_body     = review.body -%}
+          {%- assign r_verified = review.verified -%}
+          {%- assign r_location = review.location -%}
+          {%- assign r_date     = review.date -%}
+
+          {%- assign loop_idx   = forloop.index -%}
+          {%- if loop_idx > 8 -%}
+            {%- assign card_class = 'toy-review-card toy-review-hidden' -%}
+          {%- else -%}
+            {%- assign card_class = 'toy-review-card' -%}
+          {%- endif -%}
+
+          <div class="{{ card_class }}">
+            <span class="toy-review-stars" aria-label="{{ r_rating }} out of 5 stars">
+              {%- for i in (1..5) -%}
+                {%- assign i_int = i | plus: 0 -%}
+                {%- if i_int <= r_rating -%}★{%- else -%}☆{%- endif -%}
+              {%- endfor -%}
+            </span>
+            {%- if r_title != blank -%}
+              <div class="toy-review-title">{{ r_title | escape }}</div>
+            {%- endif -%}
+            <p class="toy-review-body">{{ r_body | escape | newline_to_br }}</p>
+            <div class="toy-review-meta">
+              <span class="toy-review-name">{{ r_name | escape }}</span>
+              {%- if r_verified -%}
+                <span class="toy-review-verified">✓ Verified Buyer</span>
+              {%- endif -%}
+              {%- if r_location != blank -%}
+                <span class="toy-review-separator">·</span>
+                <span>{{ r_location | escape }}</span>
+              {%- endif -%}
+              {%- if r_date != blank -%}
+                <span class="toy-review-separator">·</span>
+                <span class="toy-review-date">{{ r_date | date: "%b %d, %Y" }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+
+        {%- endfor -%}
+
+      {%- endif -%}
+
+    </div><!-- /toy-review-grid -->
+
+    <!-- Show More button (JS will hide it when all shown) -->
+    <div class="toy-show-more-wrap">
+      <button class="toy-show-more-btn" type="button">Show More Reviews</button>
+    </div>
+
+  </div><!-- /page-width -->
+</div><!-- /toy-reviews-section -->
+
+{%- comment -%}
+  ── Product Review Schema (JSON-LD) ───────────────────────
+  Only injected when reviews are actually visible on the page.
+{%- endcomment -%}
+{%- if display_cnt > 0 and display_avg > 0 -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "url": {{ shop.url | append: product.url | json }},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": {{ display_avg }},
+    "reviewCount": {{ display_cnt }},
+    "bestRating": "5",
+    "worstRating": "1"
+  }
+}
+</script>
+{%- endif -%}
+
+{%- endif -%}
+{%- comment -%}
+  NOTE: Section is completely hidden when has_reviews = false.
+  No empty state, no "be the first to review" prompt.
+{%- endcomment -%}

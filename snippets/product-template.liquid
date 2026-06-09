@@ -100,6 +100,9 @@
                 </h1>
               {%- endif -%}
 
+              {%- comment -%}── Rating Summary near title ──{%- endcomment -%}
+              {%- render 'product-rating-summary', product: product -%}
+
               {%- if sku_enable -%}
                 <p data-sku class="product-single__sku">
                   {%- if current_variant.sku -%}
@@ -226,6 +229,8 @@
     <p style="margin:0; font-size:18px; color:#333;">{{ promo_text }}</p>
   </div>
 {%- endif -%}
+                  {%- comment -%}── Trust Badges after price ──{%- endcomment -%}
+                  {%- render 'product-trust-badges', product: product -%}
                   {%- when 'quantity_selector' -%}
                     <div class="product-block" {{ block.shopify_attributes }}>
                       <div class="product__quantity">
@@ -277,6 +282,8 @@
                         {%- endfor -%}
                       {%- endunless -%}
                     </div>
+                  {%- comment -%}── Bundle Offers before buy buttons ──{%- endcomment -%}
+                  {%- render 'product-bundle-offers', product: product, section: section -%}
                   {%- when 'buy_buttons' -%}
                     <div class="product-block" {{ block.shopify_attributes }}>
                       {%- unless product.empty? -%}
@@ -297,6 +304,8 @@
                           ></div>
                       {%- endif -%}
                     </div>
+                  {%- comment -%}── Key Features after buy buttons ──{%- endcomment -%}
+                  {%- render 'product-key-features', product: product -%}
                   {%- when 'sales_point' -%}
                     {%- unless block.settings.text == blank -%}
                       <div class="product-block product-block--sales-point" {{ block.shopify_attributes }}>

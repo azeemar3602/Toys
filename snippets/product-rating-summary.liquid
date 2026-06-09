@@ -1,0 +1,21 @@
+{%- liquid
+  assign avg   = product.metafields.custom.review_average.value
+  assign cnt   = product.metafields.custom.review_count.value
+  assign avg_f = avg | plus: 0.0
+  assign cnt_i = cnt | plus: 0
+-%}
+
+{%- if cnt_i > 0 -%}
+  {%- assign avg_floor = avg_f | floor -%}
+  {%- assign avg_str   = avg_f | round: 1 -%}
+
+  <a href="#ToyReviewsSection" class="toy-rating-summary">
+    <span class="toy-rating-stars" aria-hidden="true">
+      {%- for i in (1..5) -%}
+        {%- if i <= avg_floor -%}★{%- else -%}☆{%- endif -%}
+      {%- endfor -%}
+    </span>
+    <span class="toy-rating-number">{{ avg_str }}</span>
+    <span class="toy-rating-count">({{ cnt_i }} Reviews)</span>
+  </a>
+{%- endif -%}

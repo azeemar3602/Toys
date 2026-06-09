@@ -1,3 +1,5 @@
+{{ 'product-conversion-sections.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign isModal = false
   if template == 'product.modal'
@@ -22,6 +24,14 @@
   video_style: section.settings.product_video_style
 -%}
 
+
+{%- comment -%}── Reviews Section (full-width below product) ──{%- endcomment -%}
+{%- unless isModal -%}
+  {%- render 'product-manual-reviews', product: product, section: section -%}
+{%- endunless -%}
+
+{{ 'product-bundle-offers.js' | asset_url | script_tag }}
+{{ 'product-reviews.js'       | asset_url | script_tag }}
 
 <script>
 /* ══ Toylicious Variant Price Updater ═══════════════════════

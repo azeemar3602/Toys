@@ -1,0 +1,23 @@
+{%- liquid
+  assign features_meta = product.metafields.custom.key_features.value
+  assign has_features  = false
+
+  if features_meta != blank
+    if features_meta.size > 0
+      assign has_features = true
+    endif
+  endif
+-%}
+
+{%- if has_features -%}
+<div class="toy-key-features product-block">
+  <div class="toy-key-features__title">Key Features</div>
+  <ul class="toy-key-features__list">
+    {%- for feature in features_meta -%}
+      {%- unless feature == blank -%}
+        <li>{{ feature | escape }}</li>
+      {%- endunless -%}
+    {%- endfor -%}
+  </ul>
+</div>
+{%- endif -%}

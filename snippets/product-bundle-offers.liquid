@@ -1,0 +1,125 @@
+{%- liquid
+  assign bundle_meta   = product.metafields.custom.bundle_options.value
+  assign current_price = product.selected_or_first_available_variant.price
+  assign use_defaults  = false
+  if bundle_meta == blank or bundle_meta.size == 0
+    assign use_defaults = true
+  endif
+-%}
+
+<div class="toy-bundle-section product-block" id="ToyBundleSection" data-product-price="{{ current_price }}">
+
+  <!-- Section header -->
+  <div class="toy-bundle-header">
+    <span class="toy-bundle-header-emoji" aria-hidden="true">🎉</span>
+    <div>
+      <div class="toy-bundle-title">Dhamakedar Deals</div>
+      <div class="toy-bundle-subtitle">Buy More Save More</div>
+    </div>
+  </div>
+
+  <!-- Bundle cards -->
+  <div class="toy-bundle-cards">
+
+    {%- if use_defaults == false -%}
+
+      {%- for opt in bundle_meta -%}
+        {%- assign is_first = forloop.first -%}
+        {%- assign base_total = current_price | times: opt.quantity -%}
+        {%- assign discount_factor = 100 | minus: opt.discount_percent -%}
+        {%- assign discounted_total = base_total | times: discount_factor | divided_by: 100 -%}
+
+        <label class="toy-bundle-card{% if is_first %} is-selected{% endif %}"
+               data-qty="{{ opt.quantity }}"
+               data-discount="{{ opt.discount_percent }}">
+
+          <input type="radio" name="toy_bundle_{{ section.id }}" value="{{ opt.quantity }}"
+                 class="toy-bundle-radio" {% if is_first %}checked{% endif %}
+                 aria-label="{{ opt.label }}">
+
+          {%- if opt.badge != blank -%}
+            <span class="toy-bundle-popular-badge">{{ opt.badge }}</span>
+          {%- endif -%}
+
+          <div class="toy-bundle-card-body">
+            <div class="toy-bundle-qty-label">{{ opt.label }}</div>
+            <div class="toy-bundle-discount-label">{{ opt.discount_label }}</div>
+          </div>
+
+          <div class="toy-bundle-price-col">
+            <div class="toy-bundle-total" data-bundle-total>
+              {{ discounted_total | money }}
+            </div>
+            {%- if opt.discount_percent > 0 -%}
+              <div class="toy-bundle-original" data-bundle-compare>
+                {{ base_total | money }}
+              </div>
+            {%- endif -%}
+          </div>
+
+        </label>
+      {%- endfor -%}
+
+    {%- else -%}
+
+      {%- comment -%} ── Default: Buy 1 ─────────────────────────── {%- endcomment -%}
+      <label class="toy-bundle-card is-selected" data-qty="1" data-discount="0">
+        <input type="radio" name="toy_bundle_{{ section.id }}" value="1"
+               class="toy-bundle-radio" checked aria-label="Buy 1">
+        <div class="toy-bundle-card-body">
+          <div class="toy-bundle-qty-label">Buy 1</div>
+          <div class="toy-bundle-discount-label" style="color:#6b7280;">Standard Price</div>
+        </div>
+        <div class="toy-bundle-price-col">
+          <div class="toy-bundle-total" data-bundle-total>
+            {{ current_price | money }}
+          </div>
+        </div>
+      </label>
+
+      {%- comment -%} ── Default: Buy 2 at 10% off ──────────────── {%- endcomment -%}
+      {%- assign buy2_total    = current_price | times: 2 | times: 90 | divided_by: 100 -%}
+      {%- assign buy2_original = current_price | times: 2 -%}
+      <label class="toy-bundle-card" data-qty="2" data-discount="10">
+        <input type="radio" name="toy_bundle_{{ section.id }}" value="2"
+               class="toy-bundle-radio" aria-label="Buy 2">
+        <span class="toy-bundle-popular-badge">Most Popular</span>
+        <div class="toy-bundle-card-body">
+          <div class="toy-bundle-qty-label">Buy 2</div>
+          <div class="toy-bundle-discount-label">10% OFF</div>
+        </div>
+        <div class="toy-bundle-price-col">
+          <div class="toy-bundle-total" data-bundle-total>{{ buy2_total | money }}</div>
+          <div class="toy-bundle-original" data-bundle-compare>{{ buy2_original | money }}</div>
+        </div>
+      </label>
+
+      {%- comment -%} ── Default: Buy 3 at 18% off ──────────────── {%- endcomment -%}
+      {%- assign buy3_total    = current_price | times: 3 | times: 82 | divided_by: 100 -%}
+      {%- assign buy3_original = current_price | times: 3 -%}
+      <label class="toy-bundle-card" data-qty="3" data-discount="18">
+        <input type="radio" name="toy_bundle_{{ section.id }}" value="3"
+               class="toy-bundle-radio" aria-label="Buy 3">
+        <div class="toy-bundle-card-body">
+          <div class="toy-bundle-qty-label">Buy 3</div>
+          <div class="toy-bundle-discount-label">18% OFF</div>
+        </div>
+        <div class="toy-bundle-price-col">
+          <div class="toy-bundle-total" data-bundle-total>{{ buy3_total | money }}</div>
+          <div class="toy-bundle-original" data-bundle-compare>{{ buy3_original | money }}</div>
+        </div>
+      </label>
+
+    {%- endif -%}
+
+  </div><!-- /toy-bundle-cards -->
+
+  <!-- Discount transparency note -->
+  <div class="toy-bundle-note">
+    ℹ️ Bundle discounts are applied at checkout via
+    <strong>Shopify Automatic Discounts</strong>.
+    Make sure quantity-based discount rules are configured in
+    <strong>Admin → Discounts</strong> for discounts to reflect in cart/checkout.
+  </div>
+
+</div>

@@ -1,0 +1,70 @@
+{%- liquid
+  assign trust_meta = product.metafields.custom.trust_badges.value
+  assign use_defaults = false
+  if trust_meta == blank or trust_meta.size == 0
+    assign use_defaults = true
+  endif
+-%}
+
+<div class="toy-trust-row product-block">
+  {%- if use_defaults == false -%}
+    {%- for badge in trust_meta -%}
+      <div class="toy-trust-item">
+        {%- case badge.icon -%}
+          {%- when 'shield', 'quality', 'premium' -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          {%- when 'return', 'money', 'refund' -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.07"/></svg>
+          {%- when 'truck', 'delivery', 'shipping' -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          {%- when 'lock', 'secure', 'safe' -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          {%- when 'check', 'checkmark' -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          {%- else -%}
+            <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        {%- endcase -%}
+        <div class="toy-trust-text">
+          <strong>{{ badge.title }}</strong>
+          {%- if badge.subtitle != blank -%}<span>{{ badge.subtitle }}</span>{%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  {%- else -%}
+    <!-- Default badge 1: Quality -->
+    <div class="toy-trust-item">
+      <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+      <div class="toy-trust-text">
+        <strong>100% Premium</strong>
+        <span>Quality</span>
+      </div>
+    </div>
+    <!-- Default badge 2: Money Back -->
+    <div class="toy-trust-item">
+      <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="1 4 1 10 7 10"/>
+        <path d="M3.51 15a9 9 0 1 0 .49-4.07"/>
+      </svg>
+      <div class="toy-trust-text">
+        <strong>7 Day's</strong>
+        <span>Money Back</span>
+      </div>
+    </div>
+    <!-- Default badge 3: Fast Delivery -->
+    <div class="toy-trust-item">
+      <svg class="toy-trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="1" y="3" width="15" height="13"/>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      <div class="toy-trust-text">
+        <strong>Delivery</strong>
+        <span>3–5 Days</span>
+      </div>
+    </div>
+  {%- endif -%}
+</div>
