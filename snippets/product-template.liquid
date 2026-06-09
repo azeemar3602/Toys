@@ -229,8 +229,6 @@
     <p style="margin:0; font-size:18px; color:#333;">{{ promo_text }}</p>
   </div>
 {%- endif -%}
-                  {%- comment -%}── Trust Badges after price ──{%- endcomment -%}
-                  {%- render 'product-trust-badges', product: product -%}
                   {%- when 'quantity_selector' -%}
                     <div class="product-block" {{ block.shopify_attributes }}>
                       <div class="product__quantity">
