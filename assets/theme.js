@@ -3787,7 +3787,9 @@ lazySizesConfig.expFactor = 4;
     function init() {
       wrapper = document.querySelector(selectors.wrapper);
       siteHeader = document.querySelector(selectors.siteHeader);
-  
+
+      if (!siteHeader) return; // Custom header without #SiteHeader — skip nav init safely
+
       config.stickyEnabled = (siteHeader.dataset.sticky === 'true');
       if (config.stickyEnabled) {
         config.wrapperOverlayed = wrapper.classList.contains(config.overlayedClass);
