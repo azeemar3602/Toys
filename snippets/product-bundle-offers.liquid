@@ -77,16 +77,16 @@
         </div>
       </label>
 
-      {%- comment -%} ── Default: Buy 2 at 10% off ──────────────── {%- endcomment -%}
-      {%- assign buy2_total    = current_price | times: 2 | times: 90 | divided_by: 100 -%}
+      {%- comment -%} ── Default: Buy 2 at 5% off ───────────────── {%- endcomment -%}
+      {%- assign buy2_total    = current_price | times: 2 | times: 95 | divided_by: 100 -%}
       {%- assign buy2_original = current_price | times: 2 -%}
-      <label class="toy-bundle-card" data-qty="2" data-discount="10">
+      <label class="toy-bundle-card" data-qty="2" data-discount="5">
         <input type="radio" name="toy_bundle_{{ section.id }}" value="2"
                class="toy-bundle-radio" aria-label="Buy 2">
         <span class="toy-bundle-popular-badge">Most Popular</span>
         <div class="toy-bundle-card-body">
           <div class="toy-bundle-qty-label">Buy 2</div>
-          <div class="toy-bundle-discount-label">10% OFF</div>
+          <div class="toy-bundle-discount-label">5% OFF</div>
         </div>
         <div class="toy-bundle-price-col">
           <div class="toy-bundle-total" data-bundle-total>{{ buy2_total | money }}</div>
@@ -94,15 +94,15 @@
         </div>
       </label>
 
-      {%- comment -%} ── Default: Buy 3+ at 18% off ─────────────── {%- endcomment -%}
-      {%- assign buy3_total    = current_price | times: 3 | times: 82 | divided_by: 100 -%}
+      {%- comment -%} ── Default: Buy 3+ at 10% off ─────────────── {%- endcomment -%}
+      {%- assign buy3_total    = current_price | times: 3 | times: 90 | divided_by: 100 -%}
       {%- assign buy3_original = current_price | times: 3 -%}
-      <label class="toy-bundle-card" data-qty="3" data-qty-min="true" data-discount="18">
+      <label class="toy-bundle-card" data-qty="3" data-qty-min="true" data-discount="10">
         <input type="radio" name="toy_bundle_{{ section.id }}" value="3"
                class="toy-bundle-radio" aria-label="Buy 3 or more">
         <div class="toy-bundle-card-body">
           <div class="toy-bundle-qty-label">Buy 3+</div>
-          <div class="toy-bundle-discount-label">18% OFF</div>
+          <div class="toy-bundle-discount-label">10% OFF</div>
         </div>
         <div class="toy-bundle-price-col">
           <div class="toy-bundle-total" data-bundle-total>{{ buy3_total | money }}</div>
