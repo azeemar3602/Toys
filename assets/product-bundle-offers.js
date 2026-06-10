@@ -78,8 +78,8 @@
           var radio = bestCard.querySelector('.toy-bundle-radio');
           if (radio) radio.checked = true;
 
-          /* Update the 3+ card price display for actual qty */
-          if (bestCard.hasAttribute('data-qty-min') && qty > parseInt(bestCard.dataset.qty, 10)) {
+          /* Update the 3+ card price display for actual qty (>= so reducing back to base also recalculates) */
+          if (bestCard.hasAttribute('data-qty-min') && qty >= parseInt(bestCard.dataset.qty, 10)) {
             updateCardPrice(bestCard, qty);
           }
         } else {
