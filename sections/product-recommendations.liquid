@@ -38,34 +38,42 @@
 {%- if section.settings.show_product_recommendations -%}
 
   {%- comment -%}
-    AJAX recommendations wrapper — theme JS populates this.
-    Hidden by default; JS shows it only when products are returned.
+    AJAX recommendations wrapper — theme JS (theme.Recommendations) fetches this
+    same section via routes.product_recommendations_url and swaps the response's
+    .product-recommendations-placeholder content into the placeholder below.
+    Hidden via the "hide" class by default; JS removes "hide" only when products
+    are returned (see theme.js theme.Recommendations.init).
   {%- endcomment -%}
   <div
     id="Recommendations-{{ product.id }}"
-    class="toy-recs-section"
+    class="toy-recs-section hide"
     data-section-id="{{ product.id }}"
     data-section-type="product-recommendations"
     data-enable="{{ recommend_products }}"
     data-product-id="{{ product.id }}"
     data-url="{{ routes.product_recommendations_url }}"
-    data-limit="{{ number_of_products }}"
-    style="display:none;">
-    <div
-      data-section-id="{{ product.id }}"
-      data-subsection
-      data-section-type="collection-template"
-      class="index-section toy-recs-inner">
-      <div class="page-width">
-        <header class="section-header">
-          <h3 class="section-header__title">
-            {{ section.settings.product_recommendations_heading }}
-          </h3>
-        </header>
-      </div>
-      <div class="page-width">
-        <div class="grid grid--uniform toy-recs-grid">
-          {%- comment -%}Products injected here by theme AJAX JS{%- endcomment -%}
+    data-limit="{{ number_of_products }}">
+    <div class="product-recommendations-placeholder">
+      <div
+        data-section-id="{{ product.id }}"
+        data-subsection
+        data-section-type="collection-template"
+        class="index-section toy-recs-inner product-recommendations">
+        <div class="page-width">
+          <header class="section-header">
+            <h3 class="section-header__title">
+              {{ section.settings.product_recommendations_heading }}
+            </h3>
+          </header>
+        </div>
+        <div class="page-width">
+          <div class="grid grid--uniform toy-recs-grid">
+            {%- if recommendations.performed -%}
+              {%- for p in recommendations.products limit: number_of_products -%}
+                {%- render 'product-grid-item', product: p, grid_item_width: grid_item_width, per_row: number_of_products -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </div>
         </div>
       </div>
     </div>

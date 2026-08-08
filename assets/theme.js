@@ -5138,10 +5138,12 @@ lazySizesConfig.expFactor = 4;
             }
           }));
   
-          // If no results, hide the entire section
+          // If no results, hide the entire section; otherwise reveal it
           var results = div.querySelectorAll(selectors.productResults);
           if (results.length === 0) {
             this.container.classList.add('hide');
+          } else {
+            this.container.classList.remove('hide');
           }
         }.bind(this));
       }
