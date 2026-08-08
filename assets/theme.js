@@ -1881,7 +1881,7 @@ lazySizesConfig.expFactor = 4;
       if (!isOpen && isAutoHeight) {
         var o = container;
         window.setTimeout(function() {
-          o.css('height','auto');
+          o.style.height = 'auto';
           isTransitioning = false;
         }, 500);
       } else {
