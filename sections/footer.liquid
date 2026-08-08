@@ -90,24 +90,21 @@
       </div>
     {%- endif -%}
 
-    {%- if section.settings.show_payment_icons or section.settings.show_delivery_partners -%}
-      <div class="footer__trust-bar">
-        {%- if section.settings.show_payment_icons -%}
-          <div class="footer__trust-bar-col">
-            <h5 class="footer__trust-bar-title">Secure Payments</h5>
-            <ul class="inline-list payment-icons footer__section">
-              <li class="icon--payment"><img src="{{ 'jazzcash.svg' | asset_url }}" alt="JazzCash" loading="lazy" /></li>
-              <li class="icon--payment"><img src="{{ 'easypaisa.svg' | asset_url }}" alt="Easypaisa" loading="lazy" /></li>
-              {%- unless shop.enabled_payment_types == empty -%}
-                {%- for type in shop.enabled_payment_types -%}
-                  <li class="icon--payment">
-                    {{ type | payment_type_svg_tag }}
-                  </li>
-                {%- endfor -%}
-              {%- endunless -%}
-            </ul>
-          </div>
-        {%- endif -%}
+    <div class="footer__trust-bar">
+        <div class="footer__trust-bar-col">
+          <h5 class="footer__trust-bar-title">Secure Payments</h5>
+          <ul class="inline-list payment-icons footer__section">
+            <li class="icon--payment"><img src="{{ 'jazzcash.svg' | asset_url }}" alt="JazzCash" loading="lazy" /></li>
+            <li class="icon--payment"><img src="{{ 'easypaisa.svg' | asset_url }}" alt="Easypaisa" loading="lazy" /></li>
+            {%- unless shop.enabled_payment_types == empty -%}
+              {%- for type in shop.enabled_payment_types -%}
+                <li class="icon--payment">
+                  {{ type | payment_type_svg_tag }}
+                </li>
+              {%- endfor -%}
+            {%- endunless -%}
+          </ul>
+        </div>
         {%- if section.settings.show_delivery_partners -%}
           <div class="footer__trust-bar-col">
             <h5 class="footer__trust-bar-title">Fast & Reliable Delivery</h5>
@@ -120,8 +117,7 @@
             </ul>
           </div>
         {%- endif -%}
-      </div>
-    {%- endif -%}
+    </div>
 
     {%- if section.settings.show_copyright -%}
       <p class="footer__small-text">
