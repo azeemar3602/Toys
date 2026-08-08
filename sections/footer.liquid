@@ -25,6 +25,50 @@
 {%- endif -%}
 
 <footer class="site-footer" data-section-id="{{ section.id }}" data-section-type="footer-section">
+
+  {%- if section.settings.show_trust_badges -%}
+    <div class="footer__trust-badges">
+      <div class="page-width footer__trust-badges-inner">
+        <div class="footer__trust-badge">
+          <span class="footer__trust-badge-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          </span>
+          <div class="footer__trust-badge-text">
+            <h4>{{ section.settings.trust_badge_1_title | default: 'Chat Support' }}</h4>
+            <p>{{ section.settings.trust_badge_1_text | default: "Your satisfaction matters to us — our support team is always here to help." }}</p>
+          </div>
+        </div>
+        <div class="footer__trust-badge">
+          <span class="footer__trust-badge-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          </span>
+          <div class="footer__trust-badge-text">
+            <h4>{{ section.settings.trust_badge_2_title | default: 'Safe & Trusted' }}</h4>
+            <p>{{ section.settings.trust_badge_2_text | default: 'We only choose original, safe-to-use toys for your kids before putting them up for sale.' }}</p>
+          </div>
+        </div>
+        <div class="footer__trust-badge">
+          <span class="footer__trust-badge-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4"></path><path d="M3 4v5h5"></path></svg>
+          </span>
+          <div class="footer__trust-badge-text">
+            <h4>{{ section.settings.trust_badge_3_title | default: 'Easy Exchange' }}</h4>
+            <p>{{ section.settings.trust_badge_3_text | default: 'Not happy with your order? Our exchange process is simple, fast and hassle-free.' }}</p>
+          </div>
+        </div>
+        <div class="footer__trust-badge">
+          <span class="footer__trust-badge-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"></path><path d="M14 8h4l3 4v4h-7V8Z"></path><circle cx="5.5" cy="18.5" r="1.5"></circle><circle cx="17.5" cy="18.5" r="1.5"></circle></svg>
+          </span>
+          <div class="footer__trust-badge-text">
+            <h4>{{ section.settings.trust_badge_4_title | default: 'Fast Delivery' }}</h4>
+            <p>{{ section.settings.trust_badge_4_text | default: "We work with Pakistan's leading courier partners so your package reaches you fast & safely." }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
   <div class="page-width">
 
     <div class="grid">
@@ -89,16 +133,37 @@
       </div>
     {%- endif -%}
 
-    {%- if section.settings.show_payment_icons -%}
-      {%- unless shop.enabled_payment_types == empty -%}
-        <ul class="inline-list payment-icons footer__section">
-          {%- for type in shop.enabled_payment_types -%}
-            <li class="icon--payment">
-              {{ type | payment_type_svg_tag }}
-            </li>
-          {%- endfor -%}
-        </ul>
-      {%- endunless -%}
+    {%- if section.settings.show_payment_icons or section.settings.show_delivery_partners -%}
+      <div class="footer__trust-bar">
+        {%- if section.settings.show_payment_icons -%}
+          <div class="footer__trust-bar-col">
+            <h5 class="footer__trust-bar-title">Secure Payments</h5>
+            <ul class="inline-list payment-icons footer__section">
+              <li class="icon--payment"><img src="{{ 'jazzcash.svg' | asset_url }}" alt="JazzCash" loading="lazy" /></li>
+              <li class="icon--payment"><img src="{{ 'easypaisa.svg' | asset_url }}" alt="Easypaisa" loading="lazy" /></li>
+              {%- unless shop.enabled_payment_types == empty -%}
+                {%- for type in shop.enabled_payment_types -%}
+                  <li class="icon--payment">
+                    {{ type | payment_type_svg_tag }}
+                  </li>
+                {%- endfor -%}
+              {%- endunless -%}
+            </ul>
+          </div>
+        {%- endif -%}
+        {%- if section.settings.show_delivery_partners -%}
+          <div class="footer__trust-bar-col">
+            <h5 class="footer__trust-bar-title">Fast & Reliable Delivery</h5>
+            <ul class="inline-list delivery-partners footer__section">
+              <li class="delivery-partner-badge">PostEx</li>
+              <li class="delivery-partner-badge">Tranzo</li>
+              <li class="delivery-partner-badge">Sonic-Trax</li>
+              <li class="delivery-partner-badge">Daewoo Fastex</li>
+              <li class="delivery-partner-badge">Insta Logistics</li>
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
     {%- if section.settings.show_copyright -%}
@@ -114,6 +179,98 @@
 </footer>
 
 <style>
+/* ══ FOOTER TRUST BADGES ROW ══════════════════════════════ */
+.footer__trust-badges {
+  background: var(--toy-cream, #FFFDF8);
+  border-bottom: 1px solid var(--toy-border, #ECECF3);
+}
+.footer__trust-badges-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  padding: 36px 0;
+}
+.footer__trust-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.footer__trust-badge-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--toy-pink-bg, #FFF0F6);
+  color: var(--toy-pink, #F72568);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.footer__trust-badge-icon svg { width: 22px; height: 22px; }
+.footer__trust-badge-text h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--toy-navy, #111936);
+}
+.footer__trust-badge-text p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(17,25,54,0.6);
+}
+@media (max-width: 959px) {
+  .footer__trust-badges-inner { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 599px) {
+  .footer__trust-badges-inner { grid-template-columns: 1fr; gap: 24px; padding: 28px 20px; }
+}
+
+/* ══ FOOTER TRUST BAR (payments + delivery partners) ═══════ */
+.footer__trust-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  margin-top: 8px;
+}
+.footer__trust-bar-col { flex: 1 1 260px; }
+.footer__trust-bar-title {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.footer__trust-bar .payment-icons,
+.footer__trust-bar .delivery-partners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer__trust-bar .icon--payment img,
+.footer__trust-bar .icon--payment svg {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+.delivery-partner-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
 /* ══ MOBILE FOOTER ACCORDION ═══════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -299,13 +456,77 @@
       },
       {
         "type": "header",
+        "content": "Trust badges row"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_trust_badges",
+        "label": "Show trust badges row",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_1_title",
+        "label": "Badge 1 title",
+        "default": "Chat Support"
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_1_text",
+        "label": "Badge 1 text",
+        "default": "Your satisfaction matters to us — our support team is always here to help."
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_2_title",
+        "label": "Badge 2 title",
+        "default": "Safe & Trusted"
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_2_text",
+        "label": "Badge 2 text",
+        "default": "We only choose original, safe-to-use toys for your kids before putting them up for sale."
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_3_title",
+        "label": "Badge 3 title",
+        "default": "Easy Exchange"
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_3_text",
+        "label": "Badge 3 text",
+        "default": "Not happy with your order? Our exchange process is simple, fast and hassle-free."
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_4_title",
+        "label": "Badge 4 title",
+        "default": "Fast Delivery"
+      },
+      {
+        "type": "text",
+        "id": "trust_badge_4_text",
+        "label": "Badge 4 text",
+        "default": "We work with Pakistan's leading courier partners so your package reaches you fast & safely."
+      },
+      {
+        "type": "header",
         "content": "Additional footer content"
       },
       {
         "type": "checkbox",
         "id": "show_payment_icons",
         "label": "Show payment icons",
-        "default": false
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_delivery_partners",
+        "label": "Show delivery partner badges",
+        "default": true
       },
       {
         "type": "checkbox",
